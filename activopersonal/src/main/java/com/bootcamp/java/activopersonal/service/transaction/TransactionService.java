@@ -9,9 +9,15 @@ import reactor.core.publisher.Mono;
 public interface TransactionService {
 
     public Flux<TransactionDTO> findAll();
+    //public Flux<ProductClientTransactionDTO> findByDocumentNumber(String documentNumber);
 
-    public Mono<TransactionDTO> findById(String Id);
+    public Mono<TransactionDTO> register(TransactionRequestModel transactionRequestDTO);
 
-    public Mono<ProductClientTransactionDTO> create(TransactionRequestModel transactionRequestModel);
+    public Mono<TransactionDTO> registerTrxEntradaExterna(TransactionDTO transactionDTO,
+                                                          String IdProductClient);
+
+    public Flux<ProductClientTransactionDTO> findByDocumentNumber(String documentNumber);
+
+    //public Mono<ProductClientTransactionDTO> create(TransactionRequestModel transactionRequestModel);
 
 }

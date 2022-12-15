@@ -36,7 +36,7 @@ public class TransactionEntity {
     private String sourceAccountNumber;
 
     @NotNull
-    private Integer ownAccountTransfers;
+    private Integer ownAccountNumber;
 
     @NotNull
     private Date registrationDate;

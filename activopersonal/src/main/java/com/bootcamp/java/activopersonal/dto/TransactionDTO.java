@@ -14,6 +14,6 @@ public class TransactionDTO {
     private Double mont;
     private String destinationAccountNumber;
     private String sourceAccountNumber;
-    private Integer ownAccountTransfers;
+    private Integer ownAccountNumber;
     private Date registrationDate;
 }

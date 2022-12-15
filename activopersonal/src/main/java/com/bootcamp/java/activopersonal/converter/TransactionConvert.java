@@ -24,7 +24,7 @@ public class TransactionConvert {
                 .mont(transaction.getMont())
                 .destinationAccountNumber(transaction.getDestinationAccountNumber())
                 .sourceAccountNumber(transaction.getDestinationAccountNumber())
-                .ownAccountTransfers(transaction.getOwnAccountTransfers())
+                .ownAccountNumber(transaction.getOwnAccountNumber())
                 .registrationDate(transaction.getRegistrationDate())
                 .build();
     }
@@ -36,12 +36,12 @@ public class TransactionConvert {
                 .mont(transactionDTO.getMont())
                 .destinationAccountNumber(transactionDTO.getDestinationAccountNumber())
                 .sourceAccountNumber(transactionDTO.getSourceAccountNumber())
-                .ownAccountTransfers(transactionDTO.getOwnAccountTransfers())
+                .ownAccountNumber(transactionDTO.getOwnAccountNumber())
                 .registrationDate(transactionDTO.getRegistrationDate())
                 .build();
     }
 
-    public static TransactionEntity ModelToEntity(TransactionRequestModel transactionRequestModel, Double transactionFee) {
+    public static TransactionEntity ModelToEntity(TransactionRequestModel transactionRequestModel) {
         Date currentDate = new Date();
         return TransactionEntity.builder()
                 .idProductClient(transactionRequestModel.getIdProductClient())
@@ -49,7 +49,8 @@ public class TransactionConvert {
                 .mont(transactionRequestModel.getMont())
                 .destinationAccountNumber(transactionRequestModel.getDestinationAccountNumber())
                 .sourceAccountNumber(transactionRequestModel.getSourceAccountNumber())
-                .transactionFee(transactionFee)
+                .ownAccountNumber(transactionRequestModel.getOwnAccountNumber())
+                .transactionFee(transactionRequestModel.getTransactionFee())
                 .registrationDate(currentDate)
                 .build();
     }
@@ -63,7 +64,7 @@ public class TransactionConvert {
                 .mont(membership.getCreditLimit())
                 .sourceAccountNumber(productClientEntity.getAccountNumber())
                 .destinationAccountNumber(productClientEntity.getAccountNumber())
-                .ownAccountTransfers(Constants.OwnAccountTransfer.Si)
+                .ownAccountNumber(Constants.OwnAccountNumber.Si)
                 .transactionFee(TransactionFreeFee)
                 .registrationDate(currentDate)
                 .build();

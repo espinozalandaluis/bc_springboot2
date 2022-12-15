@@ -42,7 +42,7 @@ public class Constants {
 
     }
 
-    public class  OwnAccountTransfer
+    public class  OwnAccountNumber
     {
         public static final int Si = 1;
         public static final int No = 0;

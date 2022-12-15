@@ -33,18 +33,17 @@ public class TransactionController {
                 .body(transactionService.findAll()));
     }
 
-    @GetMapping("/{id}")
-    public Mono<ResponseEntity<TransactionDTO>> getById(@PathVariable String id){
-        log.info("getById executed {}", id);
-        return transactionService.findById(id)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.noContent().build());
+    @GetMapping("/{documentNumber}")
+    public Mono<ResponseEntity<Flux<ProductClientTransactionDTO>>> getByDocumentNumber(@PathVariable String documentNumber){
+        log.info("getByDocumentNumber executed {}", documentNumber);
+        return Mono.just(ResponseEntity.ok()
+                .body(transactionService.findByDocumentNumber(documentNumber)));
     }
 
     @PostMapping
-    public Mono<ResponseEntity<ProductClientTransactionDTO>> create(@Valid @RequestBody TransactionRequestModel transactionRequestModel){
+    public Mono<ResponseEntity<TransactionDTO>> create(@Valid @RequestBody TransactionRequestModel transactionRequestModel){
         log.info("create excecuted {}",transactionRequestModel);
-        return transactionService.create(transactionRequestModel)
+        return transactionService.register(transactionRequestModel)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

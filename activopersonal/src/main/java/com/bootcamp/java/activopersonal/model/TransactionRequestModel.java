@@ -1,5 +1,6 @@
 package com.bootcamp.java.activopersonal.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,12 +12,30 @@ import java.util.Date;
 @Data
 @Builder
 public class TransactionRequestModel {
+    @JsonIgnore
+    private String id;
+
     private String idProductClient;
+
     @Min(1)
-    @Max(4)
+    @Max(6)
     private Integer idTransactionType;
+
     private Double mont;
-    private String destinationAccountNumber;
+
+    @JsonIgnore
+    private Date registrationDate;
+
+    @JsonIgnore
     private String sourceAccountNumber;
-    private Integer ownAccountNumber;
+
+    @JsonIgnore
+    private Integer OwnAccountNumber;
+
+    private String destinationAccountNumber;
+
+    private Integer destinationIdProduct;
+
+    @JsonIgnore
+    private Double transactionFee;
 }
