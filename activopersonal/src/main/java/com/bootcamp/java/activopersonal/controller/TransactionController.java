@@ -19,7 +19,7 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/transaction")
+@RequestMapping("/v1/transactionActivoPersonal")
 public class TransactionController {
 
     @Autowired

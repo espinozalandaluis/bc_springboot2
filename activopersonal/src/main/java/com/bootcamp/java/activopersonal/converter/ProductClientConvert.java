@@ -83,15 +83,15 @@ public class ProductClientConvert {
                 .clientDocumentTypeDescription(client.getClientDocumentTypeDTO().getDescription())
                 .documentNumber(membership.getDocumentNumber())
                 .fullName(client.getFullName())
-                .authorizedSigners("")
-                .creditCardNumber(membership.getCreditCardNumber())
+                //.authorizedSigners("")
+                //.creditCardNumber("")
                 .accountNumber(membership.getAccountNumber())
                 .creditLimit(membership.getCreditLimit())
-                .balance(0.0)
-                .debt(0.0)
-                .maintenanceCost(0.0)
-                .movementLimit(0)
-                .credits(0)
+                //.balance(0.0)
+                //.debt(0.0)
+                //.maintenanceCost(0.0)
+                //.movementLimit(0)
+                //.credits(0)
                 .build();
     }
 }

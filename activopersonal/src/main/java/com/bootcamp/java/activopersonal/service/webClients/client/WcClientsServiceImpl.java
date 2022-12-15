@@ -42,8 +42,21 @@ public class WcClientsServiceImpl implements  WcClientsService {
     }
 
     @Override
-    public Mono<ClientResponseDTO> findById(String documentNumber) {
+    public Mono<ClientResponseDTO> findById(Integer IdClient) {
         return wcClients.get()
+                .uri("/{IdClient}" ,IdClient)
+                .retrieve()
+                .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
+                        response -> response.bodyToMono(String.class)
+                                .map(Exception::new))
+                .bodyToMono(ClientResponseDTO.class)
+                .timeout(Duration.ofMillis(TimeOutWebClients));
+    }
+
+    @Override
+    public Mono<ClientResponseDTO> findByDocumentNumber(String documentNumber) {
+        return wcClients.get()
+                .uri("/{documentNumber}" ,documentNumber)
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
                         response -> response.bodyToMono(String.class)

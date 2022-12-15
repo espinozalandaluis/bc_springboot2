@@ -15,7 +15,7 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/transactionType")
+@RequestMapping("/v1/transactionTypeActivoPersonal")
 public class TransactionTypeController {
 
     @Autowired

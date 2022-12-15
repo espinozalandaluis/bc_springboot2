@@ -13,4 +13,5 @@ public class ProductResponseDTO {
     private String description;
     private ProductTypeDTO productTypeDTO;
     private ProductSubTypeDTO productSubTypeDTO;
+    private Double transactionFee;
 }

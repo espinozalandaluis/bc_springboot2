@@ -11,6 +11,8 @@ import org.yaml.snakeyaml.scanner.Constant;
 
 import java.util.Date;
 
+import static com.bootcamp.java.activopersonal.common.Constants.TransactionFreeFee;
+
 @Component
 public class TransactionConvert {
 
@@ -53,16 +55,16 @@ public class TransactionConvert {
     }
 
     public static TransactionEntity PopulateProductClientEntityActive(ProductClientEntity productClientEntity,
-                                                                      MembershipRequestModel membership,
-                                                                      Integer idTransactionType){
+                                                                      MembershipRequestModel membership){
         Date currentDate = new Date();
         return TransactionEntity.builder()
                 .idProductClient(productClientEntity.getId())
-                .idTransactionType(idTransactionType)
+                .idTransactionType(Constants.TransactionType.Deposito)
                 .mont(membership.getCreditLimit())
-                .sourceAccountNumber(membership.getCreditCardNumber())
-                .destinationAccountNumber(membership.getCreditCardNumber())
+                .sourceAccountNumber(productClientEntity.getAccountNumber())
+                .destinationAccountNumber(productClientEntity.getAccountNumber())
                 .ownAccountTransfers(Constants.OwnAccountTransfer.Si)
+                .transactionFee(TransactionFreeFee)
                 .registrationDate(currentDate)
                 .build();
     }

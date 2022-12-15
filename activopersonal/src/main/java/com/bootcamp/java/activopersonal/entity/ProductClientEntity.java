@@ -64,6 +64,10 @@ public class ProductClientEntity {
     private String creditCardNumber;//null
 
     @NotNull
+    private Double transactionFee;
+
+    @NotNull
+    @Indexed(unique = true)
     private String accountNumber;
 
     @NotNull

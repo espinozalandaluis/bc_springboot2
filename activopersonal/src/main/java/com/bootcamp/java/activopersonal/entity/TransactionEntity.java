@@ -44,4 +44,7 @@ public class TransactionEntity {
     @NotNull
     private Double transactionFee;
 
+    @NotNull
+    private Integer destinationIdProduct;
+
 }

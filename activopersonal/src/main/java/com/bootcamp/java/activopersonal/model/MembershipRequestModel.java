@@ -8,5 +8,5 @@ public class MembershipRequestModel {
     private String documentNumber;
     private Double creditLimit;
     private String accountNumber;
-    private String creditCardNumber;//borrar
+    //private String creditCardNumber;//TODO->Considerar para microservicio de tarjetas de credito
 }

@@ -18,7 +18,7 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/Afiliacion")
+@RequestMapping("/v1/afiliacionActivoPersonal")
 public class ProductClientController {
 
     @Autowired

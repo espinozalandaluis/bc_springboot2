@@ -50,6 +50,7 @@ public class Constants {
     }
 
     public static final Double MaintenanceCost = 0.0;
+    public static final Double TransactionFreeFee = 0.0;
 
     public static final String WebClientUriMSCliente = "http://localhost:8080/v1/client";
 

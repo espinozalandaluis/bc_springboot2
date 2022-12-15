@@ -69,7 +69,7 @@ public class ProductClientServiceImpl implements ProductClientService{
         return productClientRepository.findByDocumentNumber(membershipRequestModel.getDocumentNumber()).collectList()
                 .flatMap(valProdCli ->{
                     if(valProdCli.stream().count()==0){
-                        return wcClientsService.findById(membershipRequestModel.getDocumentNumber())
+                        return wcClientsService.findByDocumentNumber(membershipRequestModel.getDocumentNumber())
                                 .flatMap(client->{
                                     log.info("Resultado de llamar al servicio de Clients: {}",client.toString());
                                     if(client.getClientTypeDTO().getIdClientType() != Constants.ClientType.PersonalRegular)
@@ -85,27 +85,33 @@ public class ProductClientServiceImpl implements ProductClientService{
                                                 if(product.getProductSubTypeDTO().getIdProductSubType() != Constants.ProductSubType.CreditoPersonal)
                                                     return Mono.error(new FunctionalException("El subtipo de producto no pertenece a credito personal"));
 
-                                                return productClientRepository
-                                                        .save(productClientConvert.PopulateProductClientEntityActive(client,product,membershipRequestModel))
-                                                        .flatMap(productClient -> {
-                                                            log.info("Resultado de guardar ProductClient: {}",productClient.toString());
-                                                            if(membershipRequestModel.getCreditLimit() > 0){
-                                                                return transactionRepository
-                                                                        .save(transactionConvert.PopulateProductClientEntityActive(productClient,membershipRequestModel,Constants.TransactionType.Deposito))
-                                                                        .flatMap(transaction ->{
-                                                                            log.info("Resultado de guardar Transactions: {}",transaction.toString());
-                                                                            return Mono.just(ProductClientTransactionDTO.builder()
-                                                                                    .productClientDTO(productClientConvert.EntityToDTO(productClient))
-                                                                                    .transactionDTO(transactionConvert.EntityToDTO(transaction))
-                                                                                    .build());
-                                                                        }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el Transaction")));
-                                                            }
-                                                            else{
-                                                                return Mono.just(ProductClientTransactionDTO.builder()
-                                                                        .productClientDTO(productClientConvert.EntityToDTO(productClient))
-                                                                        .build());
-                                                            }
-                                                        }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el ProductClient")));
+                                                if(membershipRequestModel.getCreditLimit()>0){
+                                                    return productClientRepository
+                                                            .save(productClientConvert.PopulateProductClientEntityActive(client,product,membershipRequestModel))
+                                                            .flatMap(productClient -> {
+                                                                log.info("Resultado de guardar ProductClient: {}",productClient.toString());
+                                                                if(membershipRequestModel.getCreditLimit() > 0){
+                                                                    return transactionRepository
+                                                                            .save(transactionConvert.PopulateProductClientEntityActive(productClient,membershipRequestModel))
+                                                                            .flatMap(transaction ->{
+                                                                                log.info("Resultado de guardar Transactions: {}",transaction.toString());
+                                                                                return Mono.just(ProductClientTransactionDTO.builder()
+                                                                                        .productClientDTO(productClientConvert.EntityToDTO(productClient))
+                                                                                        .transactionDTO(transactionConvert.EntityToDTO(transaction))
+                                                                                        .build());
+                                                                            }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el Transaction")));
+                                                                }
+                                                                else{
+                                                                    return Mono.just(ProductClientTransactionDTO.builder()
+                                                                            .productClientDTO(productClientConvert.EntityToDTO(productClient))
+                                                                            .build());
+                                                                }
+                                                            }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el ProductClient")));
+                                                }
+                                                else{
+                                                    //TODO->VALIDAR CON ANTHONY
+                                                    return Mono.error(new FunctionalException("Es obligatorio ingresar un monto en el campo CreditLimit"));
+                                                }
                                             }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de producto")));
                                 }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de cliente")));
                     }

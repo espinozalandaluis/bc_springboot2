@@ -36,13 +36,12 @@ public class WcProductsServiceImpl implements  WcProductsService{
                                 .map(Exception::new))
                 .bodyToFlux(ProductResponseDTO.class)
                 .timeout(Duration.ofMillis(TimeOutWebClients));
-
-
     }
 
     @Override
     public Mono<ProductResponseDTO> findById(Integer IdProduct) {
         return wcProducts.get()
+                .uri("/{IdProduct}" ,IdProduct)
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
                         response -> response.bodyToMono(String.class)

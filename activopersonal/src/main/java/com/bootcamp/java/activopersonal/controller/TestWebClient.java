@@ -32,7 +32,7 @@ public class TestWebClient {
 
     @GetMapping("/{documentNumber}")
     public Mono<ResponseEntity<ClientResponseDTO>> getProductById(@PathVariable String documentNumber){
-        return wcClientsService.findById(documentNumber)
+        return wcClientsService.findByDocumentNumber(documentNumber)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.noContent().build());
     }

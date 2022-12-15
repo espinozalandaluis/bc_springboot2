@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface WcClientsService {
     public Flux<ClientResponseDTO> findAll();
+    public Mono<ClientResponseDTO> findById(Integer IdClient);
 
-    public Mono<ClientResponseDTO> findById(String documentNumber);
+    public Mono<ClientResponseDTO> findByDocumentNumber(String documentNumber);
 }
