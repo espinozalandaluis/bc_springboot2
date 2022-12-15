@@ -3,6 +3,7 @@ package com.bootcamp.java.activopersonal.service.webClients.client;
 import com.bootcamp.java.activopersonal.dto.webclients.client.ClientResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.Constants;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,6 +15,9 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
+import static com.bootcamp.java.activopersonal.common.Constants.TimeOutWebClients;
+import static com.bootcamp.java.activopersonal.common.Constants.WebClientUriMSCliente;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,7 +25,7 @@ import java.time.Duration;
 public class WcClientsServiceImpl implements  WcClientsService {
 
     private final WebClient wcClients = WebClient.builder()
-            .baseUrl("http://localhost:8082/v1/client")
+            .baseUrl(WebClientUriMSCliente)
             .defaultCookie("cookieKey", "cookieValue")
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
@@ -34,7 +38,7 @@ public class WcClientsServiceImpl implements  WcClientsService {
                         response -> response.bodyToMono(String.class)
                                 .map(Exception::new))
                 .bodyToFlux(ClientResponseDTO.class)
-                .timeout(Duration.ofMillis(10_000));
+                .timeout(Duration.ofMillis(TimeOutWebClients));
     }
 
     @Override
@@ -45,6 +49,6 @@ public class WcClientsServiceImpl implements  WcClientsService {
                         response -> response.bodyToMono(String.class)
                                 .map(Exception::new))
                 .bodyToMono(ClientResponseDTO.class)
-                .timeout(Duration.ofMillis(10_000));
+                .timeout(Duration.ofMillis(TimeOutWebClients));
     }
 }

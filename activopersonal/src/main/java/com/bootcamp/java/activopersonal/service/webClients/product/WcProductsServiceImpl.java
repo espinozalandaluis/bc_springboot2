@@ -14,58 +14,40 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
+import static com.bootcamp.java.activopersonal.common.Constants.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class WcProductsServiceImpl implements  WcProductsService{
 
-
+    private final WebClient wcProducts = WebClient.builder()
+            .baseUrl(WebClientUriMSProducto)
+            .defaultCookie("cookieKey", "cookieValue")
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
     @Override
     public Flux<ProductResponseDTO> findAll() {
-        WebClient client2 = WebClient.builder()
-                .baseUrl("http://localhost:8081/v1/product")
-                .defaultCookie("cookieKey", "cookieValue")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-
-        Flux<ProductResponseDTO> dataProductResponseDTO =  client2.get()
-                .retrieve()
-                .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
-                        response -> response.bodyToMono(String.class)
-                                .map(Exception::new))
-                .bodyToFlux(ProductResponseDTO.class);
-
-        log.info("dataProductResponseDTO: {}",dataProductResponseDTO);
-
-        return client2.get()
+        return wcProducts.get()
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
                         response -> response.bodyToMono(String.class)
                                 .map(Exception::new))
                 .bodyToFlux(ProductResponseDTO.class)
-                .timeout(Duration.ofMillis(10_000));
+                .timeout(Duration.ofMillis(TimeOutWebClients));
 
 
     }
 
     @Override
     public Mono<ProductResponseDTO> findById(Integer IdProduct) {
-        log.info("El idProducto consultado es: {}",IdProduct.toString());
-        WebClient client2 = WebClient.builder()
-                .baseUrl("http://localhost:8081/v1/product/"+ IdProduct)
-                .defaultCookie("cookieKey", "cookieValue")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-
-
-
-        return client2.get()
+        return wcProducts.get()
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
                         response -> response.bodyToMono(String.class)
                                 .map(Exception::new))
                 .bodyToMono(ProductResponseDTO.class)
-                .timeout(Duration.ofMillis(10_000));
+                .timeout(Duration.ofMillis(TimeOutWebClients));
     }
 }

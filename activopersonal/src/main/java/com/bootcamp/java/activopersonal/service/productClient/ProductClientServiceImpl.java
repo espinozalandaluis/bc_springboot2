@@ -72,7 +72,7 @@ public class ProductClientServiceImpl implements ProductClientService{
                         return wcClientsService.findById(membershipRequestModel.getDocumentNumber())
                                 .flatMap(client->{
                                     log.info("Resultado de llamar al servicio de Clients: {}",client.toString());
-                                    if(client.getClientTypeDTO().getIdClientType() != Constants.ClientType.Personal)
+                                    if(client.getClientTypeDTO().getIdClientType() != Constants.ClientType.PersonalRegular)
                                         return Mono.error(new FunctionalException("El tipo de cliente no es personal"));
                                     if(client.getClientDocumentTypeDTO().getIdClientDocumentType() != Constants.ClientDocumentType.DNI)
                                         return Mono.error(new FunctionalException("El tipo de documento del cliente no es DNI"));
