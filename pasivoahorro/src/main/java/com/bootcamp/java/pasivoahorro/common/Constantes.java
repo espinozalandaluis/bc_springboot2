@@ -40,4 +40,6 @@ public class Constantes {
     public static final Integer ProductoActivoPersonal = 4;
     public static final Integer ProductoActivoEmpresarial = 5;
     public static final Integer ProductoActivoTarjetaCredito = 6;
+
+    public static final long TimeOutWebClients = 10_000;
 }

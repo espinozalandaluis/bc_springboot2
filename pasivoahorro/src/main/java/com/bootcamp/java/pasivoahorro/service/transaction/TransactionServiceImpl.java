@@ -10,6 +10,7 @@ import com.bootcamp.java.pasivoahorro.entity.ProductClient;
 import com.bootcamp.java.pasivoahorro.entity.Transaction;
 import com.bootcamp.java.pasivoahorro.repository.ProductClientRepository;
 import com.bootcamp.java.pasivoahorro.repository.TransactionRepository;
+import com.bootcamp.java.pasivoahorro.service.webClients.pasivoCuentaCorriente.WcPasivoCuentaCorrienteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,47 +40,25 @@ public class TransactionServiceImpl implements TransactionService{
     @Autowired
     ProductClientConvert productClientConvert;
 
-    @Override
-    public Mono<TransactionDTO> registerTrx(TransactionDTO transactionDTO) {
-
-        return productClientRepository.findById(transactionDTO.getIdProductClient())
-                .flatMap(prodclient -> {
-                    return transactionRepository.findTrxPerMoth(Funciones.GetFirstDayOfCurrentMonth()
-                            ,transactionDTO.getIdProductClient()).collectList()
-                            .flatMap(trxPerMonth -> {
-                                log.info("Cantidad Trx Por Mes {}", trxPerMonth.stream().count());
-                                log.info("getMovementLimit {}", prodclient.getMovementLimit());
-                                if (trxPerMonth.stream().count() >= prodclient.getMovementLimit()) {
-                                    return Mono.error(new FunctionalException("No se puede registrar trx por limite de transacciones"));
-                                }
-                                Transaction trx = transactionConverter.DTOtoEntity(transactionDTO);
-                                return transactionRepository.save(trx)
-                                        .flatMap(t->{
-                                            prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
-                                                    trx.getMont(),
-                                                    trx.getIdTransactionType(),
-                                                    trx.getTransactionFee()));
-                                            log.info("getBalance {}", prodclient.getBalance());
-
-                                            return productClientRepository.save(prodclient)
-                                                    .flatMap(x-> {
-                                                        log.info("Actualizado el balance");
-                                                        return transactionRepository.findById(t.getId())
-                                                                .map(TransactionConvert::EntityToDTO);
-                                                    });
-                                        });
-                            });
-                })
-                .switchIfEmpty(Mono.error(() -> new FunctionalException("No se encontro el producto")));
-    }
+    @Autowired
+    WcPasivoCuentaCorrienteService wcPasivoCuentaCorrienteService;
 
     @Override
-    public Mono<TransactionDTO> registerTrx2(TransactionRequestDTO transactionRequestDTO) {
+    public Mono<TransactionDTO> register(TransactionRequestDTO transactionRequestDTO) {
         return productClientRepository.findById(transactionRequestDTO.getIdProductClient())
                 .flatMap(prodclient -> {
                     return transactionRepository.findTrxPerMoth(Funciones.GetFirstDayOfCurrentMonth()
                                     ,transactionRequestDTO.getIdProductClient()).collectList()
                             .flatMap(trxPerMonth -> {
+
+                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
+                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
+                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo ||
+                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida)
+                                    return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
+
+                                if(transactionRequestDTO.getMont() <= 0.009)
+                                    return Mono.error(() -> new FunctionalException("El monto debe ser mayor a 0.00"));
 
                                 if (trxPerMonth.stream().count() >= prodclient.getMovementLimit()) {
                                     log.info("Cobro de comision por pasar limite de movimientos");
@@ -91,31 +70,48 @@ public class TransactionServiceImpl implements TransactionService{
                                 }
                                 transactionRequestDTO.setSourceAccountNumber(prodclient.getAccountNumber());
 
+                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
+                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
+                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo)
+                                {
+                                    if((transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
+                                            transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo) &&
+                                            (prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee())) )
+                                    {
+                                        log.info("No tiene fondos suficientes para realizar la operacion");
+                                        return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
+                                    }
+                                    log.info("Trx Pasivo Ahorro Deposito, Retiro o Consumo");
+                                    transactionRequestDTO.setOwnAccountNumber(1); //A mi misma cuenta
+                                    /*Nuevas lineas */
+                                    transactionRequestDTO.setDestinationAccountNumber(null);
+                                    transactionRequestDTO.setDestinationIdProduct(Constantes.ProductoPasivoAhorros);
+
+                                    Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
+                                    return transactionRepository.save(trx)
+                                            .flatMap(t->{
+                                                prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
+                                                        trx.getMont(),
+                                                        trx.getIdTransactionType(),
+                                                        trx.getTransactionFee()));
+
+                                                return productClientRepository.save(prodclient)
+                                                        .flatMap(x-> {
+                                                            log.info("Actualizado el balance");
+                                                            return transactionRepository.findById(t.getId())
+                                                                    .map(TransactionConvert::EntityToDTO);
+                                                        });
+                                            });
+                                }
+
+                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida)
+                                    if(prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
+                                        return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
+
+
                                 switch (transactionRequestDTO.getDestinationIdProduct()){
                                     case 1: {
-                                        if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
-                                                transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
-                                                transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo)
-                                        {
-                                            log.info("Trx Pasivo Ahorro Deposito, Retiro o Consumo");
-                                            transactionRequestDTO.setOwnAccountNumber(1); //A mi misma cuenta
-                                            Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
-                                            return transactionRepository.save(trx)
-                                                    .flatMap(t->{
-                                                        prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
-                                                                trx.getMont(),
-                                                                trx.getIdTransactionType(),
-                                                                trx.getTransactionFee()));
-
-                                                        return productClientRepository.save(prodclient)
-                                                                .flatMap(x-> {
-                                                                    log.info("Actualizado el balance");
-                                                                    return transactionRepository.findById(t.getId())
-                                                                            .map(TransactionConvert::EntityToDTO);
-                                                                });
-                                                    });
-                                        }else if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida){
-                                            //REVISAR DESDE AQUI
+                                        if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida){
 
                                             if(prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
                                                 return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
@@ -145,27 +141,76 @@ public class TransactionServiceImpl implements TransactionService{
                                                                                         .flatMap(xyz -> {
                                                                                             return Mono.just(transactionConverter.EntityToDTO(t));
                                                                                         });
-                                                                                //return transactionRepository.findById(t.getId()).map(TransactionConvert::EntityToDTO);
                                                                             });
                                                                 });
-
-                                                        //return Mono.just(TransactionDTO.builder().build());
                                                     })
                                                     .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
                                         }else {
                                             log.info("Trx Pasivo Ahorro Otro");
                                             return Mono.error(() -> new FunctionalException("IdTransactionType no identificado"));
-                                            //return Mono.just(TransactionDTO.builder().build());
                                         }
                                     }
+                                    case 2: {
+                                        return wcPasivoCuentaCorrienteService.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                                                .flatMap(xy -> {
+                                                    if(xy.getDocumentNumber().equals(prodclient.getDocumentNumber())) {
+                                                        transactionRequestDTO.setOwnAccountNumber(1); //La cuenta de destino le pertenece al mismo cliente
+                                                    }else{
+                                                        transactionRequestDTO.setOwnAccountNumber(0); //La cuenta de destino NO le pertenece al mismo cliente
+                                                    }
+
+                                                    Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
+                                                    return transactionRepository.save(trx)
+                                                            .flatMap(t->{
+                                                                prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
+                                                                        trx.getMont(),
+                                                                        trx.getIdTransactionType(),
+                                                                        trx.getTransactionFee()));
+
+                                                                return productClientRepository.save(prodclient)
+                                                                        .flatMap(x-> {
+                                                                            log.info("Actualizado el balance");
+                                                                            //AQUI AGREGAR LLAMADO AL API DE TRX
+                                                                            return wcPasivoCuentaCorrienteService.registerTrxEntradaExterna(transactionConverter.EntityToDTO(trx),
+                                                                                    xy.getId())
+                                                                                    .flatMap(z -> {
+                                                                                        return Mono.just(transactionConverter.EntityToDTO(t));
+                                                                                    })
+                                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Error al registrar la trx en el API PasivoCuentaCorrienteService")));
+                                                                        });
+                                                            });
+                                                })
+                                                .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
+                                    }
                                     default: {
-                                        return Mono.just(TransactionDTO.builder().build());
+                                        return Mono.error(() -> new FunctionalException("El destinationIdProduct especificado no a sido implementado"));
                                     }
                                 }
 
                             });
                 })
                 .switchIfEmpty(Mono.error(() -> new FunctionalException("No se encontro el producto")));
+    }
+
+    @Override
+    public Mono<TransactionDTO> registerTrxEntradaExterna(TransactionDTO transactionDTO, String IdProductClient) {
+
+        return transactionRepository.save(transactionConverter.DTOtoEntity(transactionDTO))
+                .flatMap(trx -> {
+                    return productClientRepository.findById(IdProductClient)
+                            .flatMap(productClient -> {
+                                productClient.setBalance(CalculateBalance(productClient.getBalance(),
+                                        transactionDTO.getMont(),
+                                        Constantes.TipoTrxTransferenciaEntrada,0.0));
+
+                                return productClientRepository.save(productClient)
+                                        .flatMap(prdcli -> {
+                                            return Mono.just(transactionConverter.EntityToDTO(trx));
+                                        });
+                            })
+                            .switchIfEmpty(Mono.error(() -> new FunctionalException("Error, No se encontro producto")));
+                })
+                .switchIfEmpty(Mono.error(() -> new FunctionalException("Error al registrar la trx de entrada")));
     }
 
 

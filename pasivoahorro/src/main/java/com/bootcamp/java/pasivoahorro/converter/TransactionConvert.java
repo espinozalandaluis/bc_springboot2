@@ -25,6 +25,7 @@ public class TransactionConvert {
                 .sourceAccountNumber(transaction.getSourceAccountNumber())
                 .ownAccountNumber(transaction.getOwnAccountNumber())
                 .transactionFee(transaction.getTransactionFee())
+                .destinationIdProduct(transaction.getDestinationIdProduct())
                 .build();
 
         log.info("TransactionDTO: {}", trxDTO);
@@ -56,6 +57,7 @@ public class TransactionConvert {
                 .sourceAccountNumber(transactionRequestDTO.getSourceAccountNumber())
                 .ownAccountNumber(transactionRequestDTO.getOwnAccountNumber())
                 .transactionFee(transactionRequestDTO.getTransactionFee())
+                .destinationIdProduct(transactionRequestDTO.getDestinationIdProduct())
                 .build();
         return trx;
     }

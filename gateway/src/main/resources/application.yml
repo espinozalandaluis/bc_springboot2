@@ -13,10 +13,6 @@ spring:
           uri: lb://CLIENT
           predicates:
             - Path=/v1/client/**,/v1/clientDocumentType/**,/v1/clientType/**
-        - id: activopersonal
-          uri: lb://ACTIVOPERSONAL
-          predicates:
-            - Path=/v1/Afiliacion/**,/v1/transactionType/**,/v1/transaction/**
         - id: product
           uri: lb://PRODUCT
           predicates:

@@ -42,4 +42,7 @@ public class Transaction {
     @NotNull
     private Double transactionFee;
 
+    @NotNull
+    private Integer destinationIdProduct;
+
 }

@@ -24,4 +24,5 @@ public class TransactionDTO {
     private String destinationAccountNumber;
     private String sourceAccountNumber;
     private Integer ownAccountNumber;
+    private Integer destinationIdProduct;
 }

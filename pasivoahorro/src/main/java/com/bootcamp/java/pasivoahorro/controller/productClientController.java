@@ -43,4 +43,12 @@ public class productClientController {
                 .body(productClientService.findByDocumentNumber(documentNumber)));
     }
 
+    @GetMapping("/{accountNumber}")
+    public Mono<ResponseEntity<ProductClientDTO>> findByAccountNumber(@PathVariable String accountNumber){
+        log.info("findByAccountNumber executed {}", accountNumber);
+        return productClientService.findByAccountNumber(accountNumber)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.noContent().build());
+    }
+
 }

@@ -66,6 +66,13 @@ public class ProductClientServiceImpl implements ProductClientService{
     }
 
     @Override
+    public Mono<ProductClientDTO> findByAccountNumber(String AccountNumber) {
+        return productClientRepository.findByAccountNumber(AccountNumber)
+                .map(ProductClientConvert::EntityToDTO)
+                .switchIfEmpty(Mono.error(() -> new FunctionalException("No se encontraron registros")));
+    }
+
+    @Override
     public Mono<ProductClientTransactionDTO> create(ProductClientRequest productClientRequest) {
         log.info("Procedimiento para crear una nueva afiliacion");
         log.info("======================>>>>>>>>>>>>>>>>>>>>>>>");
@@ -73,7 +80,7 @@ public class ProductClientServiceImpl implements ProductClientService{
 
         return productClientRepository.findByDocumentNumber(productClientRequest.getDocumentNumber()).collectList()
                 .flatMap(valProdCli ->{
-                    if (valProdCli.stream().count()==0){
+                    if (valProdCli.stream().count() == 0){
                         return wcClientsService.findByDocumentNumber(productClientRequest.getDocumentNumber())
                                 .flatMap(cliente->{
                                     log.info("Resultado de llamar al servicio de Clients: {}",cliente.toString());

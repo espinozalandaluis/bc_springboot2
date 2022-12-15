@@ -12,6 +12,8 @@ public interface ProductClientService {
 
     public Flux<ProductClientDTO> findByDocumentNumber(String DocumentNumber);
 
+    public Mono<ProductClientDTO> findByAccountNumber(String AccountNumber);
+
     public Mono<ProductClientTransactionDTO> create(ProductClientRequest productClientRequest);
 
 }
