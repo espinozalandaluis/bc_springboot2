@@ -1,0 +1,13 @@
+[{
+  "_id": {
+    "$oid": "6382ccfb6a6b682ba08ee968"
+  },
+  "idProductType": 1,
+  "description": "Pasivos"
+},{
+  "_id": {
+    "$oid": "6383bf168dab68cfa9dcbc01"
+  },
+  "idProductType": 2,
+  "description": "Activos"
+}]

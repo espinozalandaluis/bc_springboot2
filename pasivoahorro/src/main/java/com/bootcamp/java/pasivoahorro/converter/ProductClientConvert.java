@@ -1,0 +1,71 @@
+package com.bootcamp.java.pasivoahorro.converter;
+
+import com.bootcamp.java.pasivoahorro.common.Constantes;
+import com.bootcamp.java.pasivoahorro.dto.ProductClientDTO;
+import com.bootcamp.java.pasivoahorro.dto.ProductClientRequest;
+import com.bootcamp.java.pasivoahorro.dto.webClientDTO.ClientResponseDTO;
+import com.bootcamp.java.pasivoahorro.dto.webClientDTO.ProductResponseDTO;
+import com.bootcamp.java.pasivoahorro.entity.ProductClient;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ProductClientConvert {
+    public static ProductClientDTO EntityToDTO(ProductClient productClient) {
+        return ProductClientDTO.builder()
+                .id(productClient.getId())
+                .idProduct(productClient.getIdProduct())
+                .productDescription(productClient.getProductDescription())
+                .idProductType(productClient.getIdProductType())
+                .productTypeDescription(productClient.getProductTypeDescription())
+                .idProductSubType(productClient.getIdProductSubType())
+                .productSubTypeDescription(productClient.getProductSubTypeDescription())
+                .idClient(productClient.getIdClient())
+                .idClientType(productClient.getIdClientType())
+                .clientTypeDescription(productClient.getClientTypeDescription())
+                .idClientDocumentType(productClient.getIdClientDocumentType())
+                .clientDocumentTypeDescription(productClient.getClientDocumentTypeDescription())
+                .documentNumber(productClient.getDocumentNumber())
+                .fullName(productClient.getFullName())
+                .authorizedSigners(productClient.getAuthorizedSigners())
+                .creditLimit(productClient.getCreditLimit())
+                .balance(productClient.getBalance())
+                .debt(productClient.getDebt())
+                .maintenanceCost(productClient.getMaintenanceCost())
+                .movementLimit(productClient.getMovementLimit())
+                .credits(productClient.getCredits())
+                .accountNumber(productClient.getAccountNumber())
+                .transactionFee(productClient.getTransactionFee())
+                .build();
+    }
+
+    public static ProductClient DTOToEntity2(ProductClientRequest productClientRequest,
+                                            ProductResponseDTO productResponseDTO,
+                                            ClientResponseDTO clientResponseDTO) {
+        return ProductClient.builder()
+                .idProduct(productResponseDTO.getIdProduct())
+                .productDescription(productResponseDTO.getDescription())
+                .idProductType(productResponseDTO.getProductTypeDTO().getIdProductType())
+                .productTypeDescription(productResponseDTO.getProductTypeDTO().getDescription())
+                .idProductSubType(productResponseDTO.getProductSubTypeDTO().getIdProductSubType())
+                .productSubTypeDescription(productResponseDTO.getProductSubTypeDTO().getDescription())
+                .idClient(clientResponseDTO.getIdClient())
+                .idClientType(clientResponseDTO.getClientTypeDTO().getIdClientType())
+                .clientTypeDescription(clientResponseDTO.getClientTypeDTO().getDescription())
+                .idClientDocumentType(clientResponseDTO.getClientDocumentTypeDTO().getIdClientDocumentType())
+                .clientDocumentTypeDescription(clientResponseDTO.getClientDocumentTypeDTO().getDescription())
+                .documentNumber(clientResponseDTO.getDocumentNumber())
+                .fullName(clientResponseDTO.getFullName())
+                //.authorizedSigners(productClientDTO.getAuthorizedSigners())
+                //.creditLimit(productClientDTO.getCreditLimit())
+                .balance(productClientRequest.getDepositAmount())
+                //.debt(productClientDTO.getDebt())
+                .maintenanceCost(Constantes.MaintenanceCost)
+                .movementLimit(productResponseDTO.getProductSubTypeDTO().getMovementLimit())
+                //.credits(productClientDTO.getCredits())
+                .accountNumber(productClientRequest.getAccountNumber())
+                .transactionFee(productResponseDTO.getTransactionFee())
+                .build();
+    }
+
+
+}

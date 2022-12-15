@@ -1,0 +1,19 @@
+[{
+  "_id": {
+    "$oid": "638a5753bd25100569e2d232"
+  },
+  "description": "DNI",
+  "idClientDocumentType": 1
+},{
+  "_id": {
+    "$oid": "638a5753bd25100569e2d233"
+  },
+  "description": "RUC",
+  "idClientDocumentType": 2
+},{
+  "_id": {
+    "$oid": "638a5753bd25100569e2d234"
+  },
+  "description": "Carnet de Extranjeria",
+  "idClientDocumentType": 3
+}]

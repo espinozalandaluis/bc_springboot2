@@ -1,0 +1,25 @@
+[{
+  "_id": {
+    "$oid": "638a5728bd25100569e2d22e"
+  },
+  "description": "Personal Regular",
+  "idClientType": 1
+},{
+  "_id": {
+    "$oid": "638a5728bd25100569e2d22f"
+  },
+  "description": "Empresarial Regular",
+  "idClientType": 2
+},{
+  "_id": {
+    "$oid": "6397cbf1086c1ae1db282b6f"
+  },
+  "description": "Personal VIP",
+  "idClientType": 3
+},{
+  "_id": {
+    "$oid": "6397cc02086c1ae1db282b71"
+  },
+  "description": "Empresarial PYME",
+  "idClientType": 4
+}]

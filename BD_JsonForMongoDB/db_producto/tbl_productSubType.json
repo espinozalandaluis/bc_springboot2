@@ -1,0 +1,61 @@
+[{
+  "_id": {
+    "$oid": "6382a4e66a6b682ba08ee949"
+  },
+  "idProductSubType": 1,
+  "idProductType": 1,
+  "maintenanceCost": 0,
+  "movementLimit": 3,
+  "credits": 0,
+  "description": "Ahorros"
+},{
+  "_id": {
+    "$oid": "6383bfce8dab68cfa9dcbc04"
+  },
+  "idProductSubType": 2,
+  "idProductType": 1,
+  "maintenanceCost": 9.85,
+  "movementLimit": 0,
+  "credits": 0,
+  "description": "Cuenta Corriente"
+},{
+  "_id": {
+    "$oid": "6383bfce8dab68cfa9dcbc05"
+  },
+  "idProductSubType": 3,
+  "idProductType": 1,
+  "maintenanceCost": 0,
+  "movementLimit": 1,
+  "credits": 0,
+  "description": "Plazo Fijo"
+},{
+  "_id": {
+    "$oid": "6383c0e68dab68cfa9dcbc07"
+  },
+  "idProductSubType": 4,
+  "idProductType": 2,
+  "maintenanceCost": 0,
+  "movementLimit": 0,
+  "credits": 1,
+  "description": "Creditos Personal"
+},{
+  "_id": {
+    "$oid": "6383c0e68dab68cfa9dcbc08"
+  },
+  "idProductSubType": 5,
+  "idProductType": 2,
+  "maintenanceCost": 0,
+  "movementLimit": 0,
+  "credits": 0,
+  "description": "Creditos Empresarial"
+},{
+  "_id": {
+    "$oid": "6383c0e68dab68cfa9dcbc09"
+  },
+  "idProductSubType": 6,
+  "idProductType": 2,
+  "maintenanceCost": 0,
+  "movementLimit": 0,
+  "credits": 0,
+  "description": "Tarjeta de Credito"
+}]

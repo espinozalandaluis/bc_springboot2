@@ -1,0 +1,20 @@
+[{
+  "_id": {
+    "$oid": "638a5772bd25100569e2d238"
+  },
+  "documentNumber": "44223355",
+  "fullName": "Juan Perez",
+  "idClient": 1,
+  "idClientType": 1,
+  "idClientDocumentType": 1
+},{
+  "_id": {
+    "$oid": "638a5772bd25100569e2d239"
+  },
+  "documentNumber": "12345678",
+  "fullName": "Luis Espinoza",
+  "idClient": 2,
+  "idClientType": 2,
+  "idClientDocumentType": 1,
+  "_class": "com.bootcamp.java.entity.ClientEntity"
+}]

@@ -1,0 +1,55 @@
+[{
+  "_id": {
+    "$oid": "6383e2838dab68cfa9dcbc27"
+  },
+  "idProduct": 1,
+  "description": "Producto Pasivos Ahorros",
+  "idProductType": 1,
+  "idProductSubType": 1,
+  "transactionFee": 0.05
+},{
+  "_id": {
+    "$oid": "6383e2838dab68cfa9dcbc28"
+  },
+  "idProduct": 2,
+  "description": "Producto Pasivos Cuenta corriente",
+  "idProductType": 1,
+  "idProductSubType": 2,
+  "transactionFee": 0.04
+},{
+  "_id": {
+    "$oid": "6383e2838dab68cfa9dcbc29"
+  },
+  "idProduct": 3,
+  "description": "Producto Pasivos Plazo fijo",
+  "idProductType": 1,
+  "idProductSubType": 3,
+  "transactionFee": 0.03
+},{
+  "_id": {
+    "$oid": "6383e2838dab68cfa9dcbc2a"
+  },
+  "idProduct": 4,
+  "description": "Producto Activos Personal",
+  "idProductType": 2,
+  "idProductSubType": 4,
+  "transactionFee": 0.05
+},{
+  "_id": {
+    "$oid": "6383e2838dab68cfa9dcbc2b"
+  },
+  "idProduct": 5,
+  "description": "Producto Activos Empresarial",
+  "idProductType": 2,
+  "idProductSubType": 5,
+  "transactionFee": 0.05
+},{
+  "_id": {
+    "$oid": "6383e2838dab68cfa9dcbc2c"
+  },
+  "idProduct": 6,
+  "description": "Producto Activos Tarjeta de Crédito personal o empresarial",
+  "idProductType": 2,
+  "idProductSubType": 6,
+  "transactionFee": 0.05
+}]
