@@ -11,4 +11,5 @@ public class ProductClientRequest {
     //private Integer movementLimit;
     private Double depositAmount;
     private String accountNumber ;
+    private String authorizedSigners;
 }

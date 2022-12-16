@@ -80,12 +80,14 @@ public class ProductClientServiceImpl implements ProductClientService{
 
         return productClientRepository.findByDocumentNumber(productClientRequest.getDocumentNumber()).collectList()
                 .flatMap(valProdCli ->{
-                    if (valProdCli.stream().count() == 0){
                         return wcClientsService.findByDocumentNumber(productClientRequest.getDocumentNumber())
                                 .flatMap(cliente->{
                                     log.info("Resultado de llamar al servicio de Clients: {}",cliente.toString());
-                                    if(!cliente.getClientTypeDTO().getIdClientType().equals(Constantes.ClientTypePersonal))
-                                        return Mono.error(new FunctionalException("El cliente no es tipo Personal"));
+
+                                    //Cliente empresarial puede tener multiples cuentas corrientes
+                                    //Cliente personal solo puede tener 1 cuenta corriente
+                                    if (valProdCli.stream().count() > 0 && cliente.getClientTypeDTO().getIdClientType().equals(Constantes.ClientTypePersonal))
+                                        return Mono.error(new FunctionalException("Los clientes de tipo personal solo pueden tener una cuenta corriente"));
 
                                     return wcProductsService.findById(productClientRequest.getIdProduct())
                                             .flatMap(producto->{
@@ -132,19 +134,10 @@ public class ProductClientServiceImpl implements ProductClientService{
                                                                     })
                                                                     .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el ProductClient")));
                                                         });
-
-
-
-
                                             })
                                             .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de producto")));
                                 })
                                 .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de cliente")));
-                        //return Mono.error(new FunctionalException(String.format("Ya existe una afiliacion asociada con el DocumentNumber: %s",productClientRequest.getDocumentNumber())));
-                    }
-                    else{
-                        return Mono.error(new FunctionalException(String.format("Ya existe una afiliacion asociada con el DocumentNumber: %s",productClientRequest.getDocumentNumber())));
-                    }
                 });
     }
 }

@@ -14,7 +14,7 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/pasivoahorro/externalTransaction")
+@RequestMapping("/v1/pasivocuentacorriente/externalTransaction")
 public class externalTransactionController {
 
     @Autowired
