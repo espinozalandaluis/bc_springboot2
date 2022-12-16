@@ -1,4 +1,4 @@
-package com.bootcamp.java.pasivocuentacorriente.service.webClients.pasivoCuentaCorriente;
+package com.bootcamp.java.pasivocuentacorriente.service.webClients.pasivoAhorro;
 
 import com.bootcamp.java.pasivocuentacorriente.common.Constantes;
 import com.bootcamp.java.pasivocuentacorriente.dto.ProductClientDTO;
@@ -19,16 +19,16 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class WcPasivoCuentaCorrienteServiceImpl implements WcPasivoCuentaCorrienteService {
+public class WcPasivoAhorroServiceImpl implements WcPasivoAhorroService {
 
-    private final WebClient wcPasivoCuentaCorriente = WebClient.builder()
-            .baseUrl(Constantes.WebClientUriMSPasivoCuentaCorriente)
+    private final WebClient wcPasivoAhorro = WebClient.builder()
+            .baseUrl(Constantes.WebClientUriMSPasivoAhorro)
             .defaultCookie("cookieKey", "cookieValue")
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
 
-    private final WebClient wcPasivoCuentaCorrienteTrx = WebClient.builder()
-            .baseUrl(Constantes.WebClientUriMSPasivoCuentaCorrienteTrx)
+    private final WebClient wcPasivoAhorroTrx = WebClient.builder()
+            .baseUrl(Constantes.WebClientUriMSPasivoAhorroTrx)
             .defaultCookie("cookieKey", "cookieValue")
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
@@ -38,7 +38,7 @@ public class WcPasivoCuentaCorrienteServiceImpl implements WcPasivoCuentaCorrien
 
     @Override
     public Mono<ProductClientDTO> findByAccountNumber(String accountNumber) {
-        return wcPasivoCuentaCorriente.get()
+        return wcPasivoAhorro.get()
                 .uri("/{accountNumber}" ,accountNumber)
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
@@ -51,7 +51,7 @@ public class WcPasivoCuentaCorrienteServiceImpl implements WcPasivoCuentaCorrien
     @Override
     public Mono<TransactionDTO> registerTrxEntradaExterna(TransactionDTO transactionDTO,
                                                           String idProductClient) {
-        return wcPasivoCuentaCorriente.post()
+        return wcPasivoAhorroTrx.post()
                 .uri("/{idProductClient}" ,idProductClient)
                 .body(Mono.just(transactionDTO), TransactionDTO.class)
                 .retrieve()

@@ -106,6 +106,10 @@ public class ProductClientServiceImpl implements ProductClientService{
                                                             ProductClient prdCli = productClientConvert.DTOToEntity2(productClientRequest,
                                                                     producto,cliente);
 
+                                                            //Cuenta Corriente Empresarial Mype, costo de mantenimiento 0.00
+                                                            if(cliente.getClientTypeDTO().getIdClientType().equals(Constantes.ClientTypeEmpresarialMype))
+                                                                prdCli.setMaintenanceCost(0.00);
+
                                                             return productClientRepository.save(prdCli)
                                                                     .flatMap(productocliente -> {
                                                                         log.info("Resultado de guardar ProductClient: {}",productocliente.toString());

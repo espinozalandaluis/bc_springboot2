@@ -51,7 +51,7 @@ public class WcPasivoCuentaCorrienteServiceImpl implements WcPasivoCuentaCorrien
     @Override
     public Mono<TransactionDTO> registerTrxEntradaExterna(TransactionDTO transactionDTO,
                                                           String idProductClient) {
-        return wcPasivoCuentaCorriente.post()
+        return wcPasivoCuentaCorrienteTrx.post()
                 .uri("/{idProductClient}" ,idProductClient)
                 .body(Mono.just(transactionDTO), TransactionDTO.class)
                 .retrieve()

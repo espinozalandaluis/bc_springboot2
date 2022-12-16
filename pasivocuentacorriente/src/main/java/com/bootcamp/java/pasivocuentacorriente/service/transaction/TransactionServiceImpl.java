@@ -10,7 +10,7 @@ import com.bootcamp.java.pasivocuentacorriente.entity.ProductClient;
 import com.bootcamp.java.pasivocuentacorriente.entity.Transaction;
 import com.bootcamp.java.pasivocuentacorriente.repository.ProductClientRepository;
 import com.bootcamp.java.pasivocuentacorriente.repository.TransactionRepository;
-import com.bootcamp.java.pasivocuentacorriente.service.webClients.pasivoCuentaCorriente.WcPasivoCuentaCorrienteService;
+import com.bootcamp.java.pasivocuentacorriente.service.webClients.pasivoAhorro.WcPasivoAhorroService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class TransactionServiceImpl implements TransactionService{
     ProductClientConvert productClientConvert;
 
     @Autowired
-    WcPasivoCuentaCorrienteService wcPasivoCuentaCorrienteService;
+    WcPasivoAhorroService wcPasivoAhorroService;
 
     @Override
     public Mono<TransactionDTO> register(TransactionRequestDTO transactionRequestDTO) {
@@ -51,11 +51,16 @@ public class TransactionServiceImpl implements TransactionService{
                                     ,transactionRequestDTO.getIdProductClient()).collectList()
                             .flatMap(trxPerMonth -> {
 
+                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaEntrada)
+                                    return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
+
+                                /*
                                 if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
                                         transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
                                         transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo ||
                                         transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida)
                                     return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
+                                 */
 
                                 if(transactionRequestDTO.getMont() <= 0.009)
                                     return Mono.error(() -> new FunctionalException("El monto debe ser mayor a 0.00"));
@@ -81,11 +86,11 @@ public class TransactionServiceImpl implements TransactionService{
                                         log.info("No tiene fondos suficientes para realizar la operacion");
                                         return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
                                     }
-                                    log.info("Trx Pasivo Ahorro Deposito, Retiro o Consumo");
+                                    log.info("Trx Pasivo Cuenta Corriente Deposito, Retiro o Consumo");
                                     transactionRequestDTO.setOwnAccountNumber(1); //A mi misma cuenta
                                     /*Nuevas lineas */
                                     transactionRequestDTO.setDestinationAccountNumber(null);
-                                    transactionRequestDTO.setDestinationIdProduct(Constantes.ProductoPasivoAhorros);
+                                    transactionRequestDTO.setDestinationIdProduct(Constantes.ProductoPasivoCuentaCorriente);
 
                                     Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
                                     return transactionRepository.save(trx)
@@ -110,7 +115,7 @@ public class TransactionServiceImpl implements TransactionService{
 
 
                                 switch (transactionRequestDTO.getDestinationIdProduct()){
-                                    case 1: {
+                                    case 2: {
                                         if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida){
 
                                             if(prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
@@ -146,12 +151,12 @@ public class TransactionServiceImpl implements TransactionService{
                                                     })
                                                     .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
                                         }else {
-                                            log.info("Trx Pasivo Ahorro Otro");
+                                            log.info("Trx Pasivo Cuenta Corriente");
                                             return Mono.error(() -> new FunctionalException("IdTransactionType no identificado"));
                                         }
                                     }
-                                    case 2: {
-                                        return wcPasivoCuentaCorrienteService.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                                    case 1: {
+                                        return wcPasivoAhorroService.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
                                                 .flatMap(xy -> {
                                                     if(xy.getDocumentNumber().equals(prodclient.getDocumentNumber())) {
                                                         transactionRequestDTO.setOwnAccountNumber(1); //La cuenta de destino le pertenece al mismo cliente
@@ -171,7 +176,7 @@ public class TransactionServiceImpl implements TransactionService{
                                                                         .flatMap(x-> {
                                                                             log.info("Actualizado el balance");
                                                                             //AQUI AGREGAR LLAMADO AL API DE TRX
-                                                                            return wcPasivoCuentaCorrienteService.registerTrxEntradaExterna(transactionConverter.EntityToDTO(trx),
+                                                                            return wcPasivoAhorroService.registerTrxEntradaExterna(transactionConverter.EntityToDTO(trx),
                                                                                     xy.getId())
                                                                                     .flatMap(z -> {
                                                                                         return Mono.just(transactionConverter.EntityToDTO(t));

@@ -1,10 +1,10 @@
-package com.bootcamp.java.pasivocuentacorriente.service.webClients.pasivoCuentaCorriente;
+package com.bootcamp.java.pasivocuentacorriente.service.webClients.pasivoAhorro;
 
 import com.bootcamp.java.pasivocuentacorriente.dto.ProductClientDTO;
 import com.bootcamp.java.pasivocuentacorriente.dto.TransactionDTO;
 import reactor.core.publisher.Mono;
 
-public interface WcPasivoCuentaCorrienteService {
+public interface WcPasivoAhorroService {
 
     public Mono<ProductClientDTO> findByAccountNumber(String AccountNumber);
 

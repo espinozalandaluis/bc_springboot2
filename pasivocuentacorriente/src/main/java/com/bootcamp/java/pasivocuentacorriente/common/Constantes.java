@@ -5,22 +5,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Constantes {
     public static final Integer ClientTypePersonal = 1;
+
+    public static final Integer ClientTypeEmpresarialMype = 4;
     public static final Integer ProductTypePasivo = 1;
-    public static final Integer ProductSubTypePasivo = 1;
+    public static final Integer ProductSubTypePasivo = 2;
 
     public static final Integer TransactionTypeDeposito = 1;
 
-    public static final Double MaintenanceCost = 0.0;
+    public static final Double MaintenanceCost = 8.55;
 
-    public static final String ExisteCuentaAhorroPasivoConNumeroDocumentoCliente = "Existe un producto pasivo ahorro con el numero de documento del cliente";
+    //public static final String ExisteCuentaAhorroPasivoConNumeroDocumentoCliente = "Existe un producto pasivo ahorro con el numero de documento del cliente";
 
     public static final String WebClientUriMSCliente = "http://localhost:8080/v1/client";
 
     public static final String WebClientUriMSProducto = "http://localhost:8080/v1/product";
 
-    public static final String WebClientUriMSPasivoCuentaCorriente = "http://localhost:8080/v1/pasivocuentacorriente";
+    //public static final String WebClientUriMSPasivoCuentaCorriente = "http://localhost:8080/v1/pasivocuentacorriente";
 
-    public static final String WebClientUriMSPasivoCuentaCorrienteTrx = "http://localhost:8080/v1/pasivoahorro/transaction";
+    //public static final String WebClientUriMSPasivoCuentaCorrienteTrx = "http://localhost:8080/v1/pasivoahorro/transaction";
+
+    public static final String WebClientUriMSPasivoAhorro = "http://localhost:8080/v1/pasivocuentacorriente";
+
+    public static final String WebClientUriMSPasivoAhorroTrx = "http://localhost:8080/v1/pasivoahorro/transaction";
 
     public static final Integer TransferenciasPropiaCuenta = 1;
 
