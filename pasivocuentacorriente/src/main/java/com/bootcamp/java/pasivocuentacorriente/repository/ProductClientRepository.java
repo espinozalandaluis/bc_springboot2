@@ -1,6 +1,7 @@
-package com.bootcamp.java.pasivoahorro.repository;
+package com.bootcamp.java.pasivocuentacorriente.repository;
 
-import com.bootcamp.java.pasivoahorro.entity.ProductClient;
+
+import com.bootcamp.java.pasivocuentacorriente.entity.ProductClient;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;

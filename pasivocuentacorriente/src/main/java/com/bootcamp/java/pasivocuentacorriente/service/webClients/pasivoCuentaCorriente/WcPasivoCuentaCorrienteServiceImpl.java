@@ -1,9 +1,8 @@
-package com.bootcamp.java.pasivoahorro.service.webClients.pasivoCuentaCorriente;
+package com.bootcamp.java.pasivocuentacorriente.service.webClients.pasivoCuentaCorriente;
 
-import com.bootcamp.java.pasivoahorro.common.Constantes;
-import com.bootcamp.java.pasivoahorro.dto.ProductClientDTO;
-import com.bootcamp.java.pasivoahorro.dto.TransactionDTO;
-import com.bootcamp.java.pasivoahorro.dto.webClientDTO.ClientResponseDTO;
+import com.bootcamp.java.pasivocuentacorriente.common.Constantes;
+import com.bootcamp.java.pasivocuentacorriente.dto.ProductClientDTO;
+import com.bootcamp.java.pasivocuentacorriente.dto.TransactionDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
