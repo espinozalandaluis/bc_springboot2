@@ -73,14 +73,19 @@ public class TransactionServiceImpl implements TransactionService{
         log.info(transactionRequestModel.toString());
         return productClientRepository.findById(transactionRequestModel.getIdProductClient())
                 .flatMap(prodclient ->{
+                    log.info("Resultado de ProductClient filtrado por {} es: {}", transactionRequestModel.getIdProductClient(),prodclient.toString());
                     return transactionRepository.findTrxPerMoth(Funciones.GetFirstDayOfCurrentMonth(),transactionRequestModel.getIdProductClient())
                             .collectList()
                             .flatMap(trxPerMonth ->{
+                                log.info("Resultado de transacciones por mes: {}",trxPerMonth.toString());
+                                /*
                                 if(transactionRequestModel.getIdTransactionType() == Constants.TransactionType.Deposito ||
                                         transactionRequestModel.getIdTransactionType() == Constants.TransactionType.Retiro ||
                                         transactionRequestModel.getIdTransactionType() == Constants.TransactionType.Consumo ||
                                         transactionRequestModel.getIdTransactionType() == Constants.TransactionType.TransferenciaSalida)
                                     return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
+
+                                 */
                                 if(transactionRequestModel.getMont() <= 0.009)
                                     return Mono.error(() -> new FunctionalException("El monto debe ser mayor a 0.00"));
                                 if (trxPerMonth.stream().count() >= prodclient.getMovementLimit()) {
@@ -104,14 +109,22 @@ public class TransactionServiceImpl implements TransactionService{
                                     log.info("Trx Pasivo Ahorro Deposito, Retiro o Consumo");
                                     transactionRequestModel.setOwnAccountNumber(1); //A mi misma cuenta
                                     transactionRequestModel.setDestinationAccountNumber(null);
+                                    log.info("transactionRequestModel {}",transactionRequestModel.toString());
                                     transactionRequestModel.setDestinationIdProduct(Constants.ProductSubType.CreditoPersonal);
+                                    log.info("begin");
+                                    log.info(transactionRequestModel.toString());
                                     TransactionEntity transactionEntity = transactionConverter.ModelToEntity(transactionRequestModel);
+                                    log.info(transactionEntity.toString());
+                                    log.info("end");
                                     return transactionRepository.save(transactionEntity)
                                             .flatMap(transaction ->{
+                                                log.info(transaction.toString() );
                                                 prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
                                                         transaction.getMont(),
                                                         transaction.getIdTransactionType(),
                                                         transaction.getTransactionFee()));
+                                                log.info("-->>");
+                                                log.info(prodclient.getBalance().toString() );
                                                 return productClientRepository.save(prodclient)
                                                         .flatMap(x ->{
                                                             log.info("Actualizado el balance");
@@ -126,8 +139,11 @@ public class TransactionServiceImpl implements TransactionService{
                                     if(prodclient.getBalance() < (transactionRequestModel.getMont() + transactionRequestModel.getTransactionFee()))
                                         return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
 
+                                log.info("DestinationIdProduct: {}",transactionRequestModel.getDestinationIdProduct());
+
                                 switch (transactionRequestModel.getDestinationIdProduct()) {
-                                    case 4:{
+                                    case 6:{
+                                        log.info("Begin switch");
                                         if(transactionRequestModel.getIdTransactionType() == Constants.TransactionType.TransferenciaSalida){
                                             if(prodclient.getBalance() < (transactionRequestModel.getMont() + transactionRequestModel.getTransactionFee()))
                                                 return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
@@ -163,7 +179,7 @@ public class TransactionServiceImpl implements TransactionService{
                                         }
                                     }
                                     default: {
-                                        return Mono.error(() -> new FunctionalException("El destinationIdProduct especificado no a sido implementado"));
+                                        return Mono.error(() -> new FunctionalException(String.format("El destinationIdProduct %s especificado no ha sido implementado",transactionRequestModel.getDestinationIdProduct())));
                                     }
                                 }
                             })

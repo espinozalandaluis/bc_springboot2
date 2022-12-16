@@ -86,11 +86,12 @@ public class ProductClientConvert {
                 //.authorizedSigners("")
                 //.creditCardNumber("")
                 .accountNumber(membership.getAccountNumber())
+                .transactionFee(product.getTransactionFee())
                 .creditLimit(membership.getCreditLimit())
-                //.balance(0.0)
+                .balance(0.0)
                 //.debt(0.0)
                 //.maintenanceCost(0.0)
-                //.movementLimit(0)
+                .movementLimit(product.getProductSubTypeDTO().getMovementLimit())
                 //.credits(0)
                 .build();
     }
