@@ -51,16 +51,9 @@ public class TransactionServiceImpl implements TransactionService{
                                     ,transactionRequestDTO.getIdProductClient()).collectList()
                             .flatMap(trxPerMonth -> {
 
-                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaEntrada)
+                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaEntrada
+                                        || transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxPago)
                                     return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
-
-                                /*
-                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida)
-                                    return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
-                                 */
 
                                 if(transactionRequestDTO.getMont() <= 0.009)
                                     return Mono.error(() -> new FunctionalException("El monto debe ser mayor a 0.00"));
@@ -222,6 +215,7 @@ public class TransactionServiceImpl implements TransactionService{
     public Mono<TransactionDTO> registerTrxEntrada(ProductClient productClient, Transaction transactionOrigen){
 
         transactionOrigen.setId(null);
+        transactionOrigen.setIdProductClient(productClient.getId());
         transactionOrigen.setIdTransactionType(Constantes.TipoTrxTransferenciaEntrada);
         transactionOrigen.setTransactionFee(0.00);
 

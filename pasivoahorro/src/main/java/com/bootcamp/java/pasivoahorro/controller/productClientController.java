@@ -36,15 +36,15 @@ public class productClientController {
                 .body(productClientService.findAll()));
     }
 
-    @GetMapping("/{documentNumber}")
+    @GetMapping("getByDocumentNumber/{documentNumber}")
     public Mono<ResponseEntity<Flux<ProductClientDTO>>> getByDocumentNumber(@PathVariable String documentNumber){
         log.info("getByDocumentNumber executed {}", documentNumber);
         return Mono.just(ResponseEntity.ok()
                 .body(productClientService.findByDocumentNumber(documentNumber)));
     }
 
-    @GetMapping("/{accountNumber}")
-    public Mono<ResponseEntity<ProductClientDTO>> findByAccountNumber(@PathVariable String accountNumber){
+    @GetMapping("getByAccountNumber/{accountNumber}")
+    public Mono<ResponseEntity<ProductClientDTO>> getByAccountNumber(@PathVariable String accountNumber){
         log.info("findByAccountNumber executed {}", accountNumber);
         return productClientService.findByAccountNumber(accountNumber)
                 .map(ResponseEntity::ok)

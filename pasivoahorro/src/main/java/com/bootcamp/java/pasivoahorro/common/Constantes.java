@@ -29,6 +29,8 @@ public class Constantes {
 
     public static final Integer TipoTrxDeposito = 1;
     public static final Integer TipoTrxRetiro = 2;
+
+    public static final Integer TipoTrxPago = 3;
     public static final Integer TipoTrxConsumo = 4;
     public static final Integer TipoTrxTransferenciaSalida = 5;
     public static final Integer TipoTrxTransferenciaEntrada = 6;

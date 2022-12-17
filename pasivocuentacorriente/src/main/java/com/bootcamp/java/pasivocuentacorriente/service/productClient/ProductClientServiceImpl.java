@@ -95,8 +95,8 @@ public class ProductClientServiceImpl implements ProductClientService{
 
                                                 if(!producto.getProductTypeDTO().getIdProductType().equals(Constantes.ProductTypePasivo))
                                                     return Mono.error(new FunctionalException("El producto no es Tipo Pasivo"));
-                                                if(!producto.getProductSubTypeDTO().getIdProductSubType().equals(Constantes.ProductSubTypePasivo))
-                                                    return Mono.error(new FunctionalException("El producto no es SubTipo Ahorro"));
+                                                if(!producto.getProductSubTypeDTO().getIdProductSubType().equals(Constantes.ProductSubTypePasivoCuentaCorriente))
+                                                    return Mono.error(new FunctionalException("El producto no es SubTipo Cuenta Corriente"));
 
                                                 return productClientRepository.findByAccountNumber(productClientRequest.getAccountNumber()).flux().collectList()
                                                         .flatMap(y->{

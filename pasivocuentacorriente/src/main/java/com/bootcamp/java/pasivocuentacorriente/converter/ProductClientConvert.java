@@ -56,7 +56,7 @@ public class ProductClientConvert {
                 .clientDocumentTypeDescription(clientResponseDTO.getClientDocumentTypeDTO().getDescription())
                 .documentNumber(clientResponseDTO.getDocumentNumber())
                 .fullName(clientResponseDTO.getFullName())
-                //.authorizedSigners(productClientDTO.getAuthorizedSigners())
+                .authorizedSigners(productClientRequest.getAuthorizedSigners())
                 //.creditLimit(productClientDTO.getCreditLimit())
                 .balance(productClientRequest.getDepositAmount())
                 //.debt(productClientDTO.getDebt())
