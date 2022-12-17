@@ -1,17 +1,19 @@
 package com.bootcamp.java.activopersonal.service.productClient;
 
-import com.bootcamp.java.activopersonal.common.Constants;
-import com.bootcamp.java.activopersonal.common.exception.FunctionalException;
+import com.bootcamp.java.activopersonal.common.Constantes;
+import com.bootcamp.java.activopersonal.common.exceptionHandler.FunctionalException;
 import com.bootcamp.java.activopersonal.converter.ProductClientConvert;
 import com.bootcamp.java.activopersonal.converter.TransactionConvert;
 import com.bootcamp.java.activopersonal.dto.ProductClientDTO;
+import com.bootcamp.java.activopersonal.dto.ProductClientRequest;
 import com.bootcamp.java.activopersonal.dto.ProductClientTransactionDTO;
-import com.bootcamp.java.activopersonal.dto.TransactionDTO;
-import com.bootcamp.java.activopersonal.model.MembershipRequestModel;
+import com.bootcamp.java.activopersonal.entity.ProductClient;
+import com.bootcamp.java.activopersonal.entity.Transaction;
 import com.bootcamp.java.activopersonal.repository.ProductClientRepository;
 import com.bootcamp.java.activopersonal.repository.TransactionRepository;
-import com.bootcamp.java.activopersonal.service.webClients.client.WcClientsService;
-import com.bootcamp.java.activopersonal.service.webClients.product.WcProductsService;
+import com.bootcamp.java.activopersonal.service.transaction.TransactionService;
+import com.bootcamp.java.activopersonal.service.webClients.Clients.WcClientsService;
+import com.bootcamp.java.activopersonal.service.webClients.Products.WcProductsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Date;
 
 @Slf4j
 @Service
@@ -34,10 +34,14 @@ public class ProductClientServiceImpl implements ProductClientService{
     @Autowired
     private TransactionRepository transactionRepository;
     @Autowired
-    ProductClientConvert productClientConvert;
+    TransactionService transactionService;
 
     @Autowired
     TransactionConvert transactionConvert;
+
+    @Autowired
+    ProductClientConvert productClientConvert;
+
     @Autowired
     WcClientsService wcClientsService;
 
@@ -53,94 +57,94 @@ public class ProductClientServiceImpl implements ProductClientService{
     }
 
     @Override
-    public Mono<ProductClientDTO> findById(String Id) {
-        log.debug("findById executing {}", Id);
-        Mono<ProductClientDTO> dataProductClientDTO = productClientRepository.findById(Id)
-                .map(prdCli -> productClientConvert.EntityToDTO(prdCli));
-        log.debug("findById executed {}", Id);
+    public Flux<ProductClientDTO> findByDocumentNumber(String DocumentNumber) {
+        log.debug("findByDocumentNumber executing");
+        Flux<ProductClientDTO> dataProductClientDTO = productClientRepository.findByDocumentNumber(DocumentNumber)
+                .map(ProductClientConvert::EntityToDTO)
+                .switchIfEmpty(Mono.error(() -> new FunctionalException("No se encontraron registros")));;
         return dataProductClientDTO;
     }
 
     @Override
-    public Mono<ProductClientTransactionDTO> create(MembershipRequestModel membershipRequestModel) {
+    public Mono<ProductClientDTO> findByAccountNumber(String AccountNumber) {
+        return productClientRepository.findByAccountNumber(AccountNumber)
+                .map(ProductClientConvert::EntityToDTO)
+                .switchIfEmpty(Mono.error(() -> new FunctionalException("No se encontraron registros")));
+    }
+
+    @Override
+    public Mono<ProductClientTransactionDTO> create(ProductClientRequest productClientRequest) {
         log.info("Procedimiento para crear una nueva afiliacion");
         log.info("======================>>>>>>>>>>>>>>>>>>>>>>>");
-        log.info(membershipRequestModel.toString());
-        return productClientRepository.findByDocumentNumber(membershipRequestModel.getDocumentNumber()).collectList()
+        log.info(productClientRequest.toString());
+
+        return productClientRepository.findByDocumentNumber(productClientRequest.getDocumentNumber()).collectList()
                 .flatMap(valProdCli ->{
-                    if(valProdCli.stream().count()==0){
-                        return wcClientsService.findByDocumentNumber(membershipRequestModel.getDocumentNumber())
-                                .flatMap(client->{
-                                    log.info("Resultado de llamar al servicio de Clients: {}",client.toString());
-                                    if(client.getClientTypeDTO().getIdClientType() != Constants.ClientType.PersonalRegular)
-                                        return Mono.error(new FunctionalException("El tipo de cliente no es personal"));
-                                    if(client.getClientDocumentTypeDTO().getIdClientDocumentType() != Constants.ClientDocumentType.DNI)
-                                        return Mono.error(new FunctionalException("El tipo de documento del cliente no es DNI"));
+                    if (valProdCli.stream().count() == 0){
+                        return wcClientsService.findByDocumentNumber(productClientRequest.getDocumentNumber())
+                                .flatMap(cliente->{
+                                    log.info("Resultado de llamar al servicio de Clients: {}",cliente.toString());
+                                    if(!cliente.getClientTypeDTO().getIdClientType().equals(Constantes.ClientTypePersonal))
+                                        return Mono.error(new FunctionalException("El cliente no es tipo Personal"));
 
-                                    return wcProductsService.findById(membershipRequestModel.getIdProduct())
-                                            .flatMap(product->{
-                                                log.info("Resultado de llamar al servicio de Products: {}",product.toString());
-                                                if(product.getProductTypeDTO().getIdProductType() != Constants.ProductType.Activos)
-                                                    return Mono.error(new FunctionalException("El tipo de producto no pertenece al grupo de Activos"));
-                                                if(product.getProductSubTypeDTO().getIdProductSubType() != Constants.ProductSubType.CreditoPersonal)
-                                                    return Mono.error(new FunctionalException("El subtipo de producto no pertenece a credito personal"));
+                                    return wcProductsService.findById(productClientRequest.getIdProduct())
+                                            .flatMap(producto->{
+                                                log.info("Resultado de llamar al servicio de Products: {}",producto.toString());
 
-                                                if(membershipRequestModel.getCreditLimit()>0){
-                                                    return productClientRepository
-                                                            .save(productClientConvert.PopulateProductClientEntityActive(client,product,membershipRequestModel))
-                                                            .flatMap(productClient -> {
-                                                                log.info("Resultado de guardar ProductClient: {}",productClient.toString());
-                                                                if(membershipRequestModel.getCreditLimit() > 0){
-                                                                    return transactionRepository
-                                                                            .save(transactionConvert.PopulateProductClientEntityActive(productClient,membershipRequestModel))
-                                                                            .flatMap(transaction ->{
-                                                                                log.info("Resultado de guardar Transactions: {}",transaction.toString());
-                                                                                return Mono.just(ProductClientTransactionDTO.builder()
-                                                                                        .productClientDTO(productClientConvert.EntityToDTO(productClient))
-                                                                                        .transactionDTO(transactionConvert.EntityToDTO(transaction))
-                                                                                        .build());
-                                                                            }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el Transaction")));
-                                                                }
-                                                                else{
-                                                                    return Mono.just(ProductClientTransactionDTO.builder()
-                                                                            .productClientDTO(productClientConvert.EntityToDTO(productClient))
-                                                                            .build());
-                                                                }
-                                                            }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el ProductClient")));
-                                                }
-                                                else{
-                                                    //TODO->VALIDAR CON ANTHONY
-                                                    return Mono.error(new FunctionalException("Es obligatorio ingresar un monto en el campo CreditLimit"));
-                                                }
-                                            }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de producto")));
-                                }).switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de cliente")));
+                                                if(!producto.getProductTypeDTO().getIdProductType().equals(Constantes.ProductTypePasivo))
+                                                    return Mono.error(new FunctionalException("El producto no es Tipo Pasivo"));
+                                                if(!producto.getProductSubTypeDTO().getIdProductSubType().equals(Constantes.ProductSubTypePasivo))
+                                                    return Mono.error(new FunctionalException("El producto no es SubTipo Ahorro"));
+
+                                                return productClientRepository.findByAccountNumber(productClientRequest.getAccountNumber()).flux().collectList()
+                                                        .flatMap(y->{
+                                                            if(y.stream().count() > 0)
+                                                                return Mono.error(new FunctionalException("Existe un AccountNumber"));
+
+                                                            ProductClient prdCli = productClientConvert.DTOToEntity2(productClientRequest,
+                                                                    producto,cliente);
+
+                                                            return productClientRepository.save(prdCli)
+                                                                    .flatMap(productocliente -> {
+                                                                        log.info("Resultado de guardar ProductClient: {}",productocliente.toString());
+                                                                        if(productClientRequest.getDepositAmount() > 0){
+                                                                            //prdCli.setTransactionFee(0.00); //Por primera transaccion no se cobra Comision
+                                                                            Transaction trxEntity = transactionConvert.ProductClientEntityToTransactionEntity(prdCli);
+                                                                            log.info("before save transaction trxEntity: {}",trxEntity.toString());
+                                                                            trxEntity.setTransactionFee(0.0);
+                                                                            return transactionRepository.save(trxEntity)
+                                                                                    .flatMap(trx -> {
+
+                                                                                        log.info("Resultado de guardar Transactions: {}",trx.toString());
+                                                                                        return Mono.just(ProductClientTransactionDTO.builder()
+                                                                                                .productClientDTO(productClientConvert.EntityToDTO(productocliente))
+                                                                                                .transactionDTO(transactionConvert.EntityToDTO(trx))
+                                                                                                .build());
+                                                                                    })
+                                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el Transaction")));
+
+                                                                        }
+                                                                        else {
+                                                                            return Mono.just(ProductClientTransactionDTO.builder()
+                                                                                    .productClientDTO(productClientConvert.EntityToDTO(productocliente))
+                                                                                    .build());
+                                                                        }
+                                                                    })
+                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el ProductClient")));
+                                                        });
+
+
+
+
+                                            })
+                                            .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de producto")));
+                                })
+                                .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de cliente")));
+                        //return Mono.error(new FunctionalException(String.format("Ya existe una afiliacion asociada con el DocumentNumber: %s",productClientRequest.getDocumentNumber())));
                     }
                     else{
-                        return Mono.error(new FunctionalException(String.format("Ya existe una afiliacion asociada con el DocumentNumber: %s",membershipRequestModel.getDocumentNumber())));
+                        return Mono.error(new FunctionalException(String.format("Ya existe una afiliacion asociada con el DocumentNumber: %s",productClientRequest.getDocumentNumber())));
                     }
                 });
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-                                return productClientRepository.findByDocumentNumber(afiliacionRequestModel.getDocumentNumber()).collectList()
-                                        .flatMap(z->{
-                                            if(z.stream().count()>1)
-                                                return Mono.error(new FunctionalException("El subtipo de producto no pertenece a credito personal"));
-                                        });
- */
