@@ -39,9 +39,19 @@ public class WcPasivoCuentaCorrienteServiceImpl implements WcPasivoCuentaCorrien
 
 
     @Override
-    public Mono<ProductClientDTO> findByAccountNumber(String accountNumber) {
+    public Mono<ProductClientDTO> findByAccountNumber(String AccountNumber) {
+
+        log.info(wcPasivoCuentaCorriente.get()
+                .uri("/{AccountNumber}" ,AccountNumber)
+                .retrieve()
+                .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
+                        response -> response.bodyToMono(String.class)
+                                .map(Exception::new))
+                .bodyToMono(ProductClientDTO.class)
+                .timeout(Duration.ofMillis(Constantes.TimeOutWebClients)).toString());
+
         return wcPasivoCuentaCorriente.get()
-                .uri("/{accountNumber}" ,accountNumber)
+                .uri("/{accountNumber}" ,AccountNumber)
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
                         response -> response.bodyToMono(String.class)
@@ -52,9 +62,9 @@ public class WcPasivoCuentaCorrienteServiceImpl implements WcPasivoCuentaCorrien
 
     @Override
     public Mono<TransactionDTO> registerTrxEntradaExterna(TransactionDTO transactionDTO,
-                                                          String idProductClient) {
+                                                          String IdProductClient) {
         return wcPasivoCuentaCorrienteTrx.post()
-                .uri("/{idProductClient}" ,idProductClient)
+                .uri("/{IdProductClient}" ,IdProductClient)
                 .body(Mono.just(transactionDTO), TransactionDTO.class)
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),

@@ -20,9 +20,11 @@ spring:
         - id: pasivoahorro
           uri: lb://PASIVOAHORRO
           predicates:
-            - Path=/v1/ProductClient/**
-            - Path=/v1/Transaction/**
-            - Path=/v1/TransactionType/**
+            - Path=/v1/pasivoahorro/transaction/**,/v1/pasivoahorro/transactionType/**,/v1/pasivoahorro/**,/v1/pasivoahorro/getByDocumentNumber/**,/v1/pasivoahorro/getByAccountNumber/**,
+        - id: pasivocuentacorriente
+          uri: lb://PASIVOCUENTACORRIENTE
+          predicates:
+            - Path=/v1/pasivocuentacorriente/transaction/**,/v1/pasivocuentacorriente/transactionType/**,/v1/pasivocuentacorriente/**,/v1/pasivocuentacorriente/getByDocumentNumber/**,/v1/pasivocuentacorriente/getByAccountNumber/**,
       discovery:
         locator:
           enabled: true

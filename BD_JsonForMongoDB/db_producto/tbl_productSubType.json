@@ -15,7 +15,7 @@
   "idProductSubType": 2,
   "idProductType": 1,
   "maintenanceCost": 9.85,
-  "movementLimit": 0,
+  "movementLimit": 4,
   "credits": 0,
   "description": "Cuenta Corriente"
 },{
@@ -25,7 +25,7 @@
   "idProductSubType": 3,
   "idProductType": 1,
   "maintenanceCost": 0,
-  "movementLimit": 1,
+  "movementLimit": 2,
   "credits": 0,
   "description": "Plazo Fijo"
 },{

@@ -55,12 +55,6 @@ public class TransactionServiceImpl implements TransactionService{
                                         || transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxPago)
                                     return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
 
-                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida)
-                                    return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
-
                                 if(transactionRequestDTO.getMont() <= 0.009)
                                     return Mono.error(() -> new FunctionalException("El monto debe ser mayor a 0.00"));
 
@@ -112,9 +106,10 @@ public class TransactionServiceImpl implements TransactionService{
                                     if(prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
                                         return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
 
-
+                                log.info("DestinationIdProduct: {}",transactionRequestDTO.getDestinationIdProduct());
                                 switch (transactionRequestDTO.getDestinationIdProduct()){
                                     case 1: {
+                                        log.info("Trx Pasivo Ahorro hacia otro Ahorro");
                                         if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida){
 
                                             if(prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
@@ -155,13 +150,18 @@ public class TransactionServiceImpl implements TransactionService{
                                         }
                                     }
                                     case 2: {
+                                        log.info("Trx Pasivo Ahorro hacia cuenta corriente");
                                         return wcPasivoCuentaCorrienteService.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
                                                 .flatMap(xy -> {
+                                                    log.info("Encontro cuenta de destino {}", xy.toString());
+
                                                     if(xy.getDocumentNumber().equals(prodclient.getDocumentNumber())) {
+
                                                         transactionRequestDTO.setOwnAccountNumber(1); //La cuenta de destino le pertenece al mismo cliente
                                                     }else{
                                                         transactionRequestDTO.setOwnAccountNumber(0); //La cuenta de destino NO le pertenece al mismo cliente
                                                     }
+                                                    log.info("OwnAccountNumber {}", transactionRequestDTO.getOwnAccountNumber());
 
                                                     Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
                                                     return transactionRepository.save(trx)

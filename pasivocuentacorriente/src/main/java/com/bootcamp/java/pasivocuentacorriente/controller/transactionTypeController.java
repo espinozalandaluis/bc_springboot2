@@ -22,7 +22,7 @@ public class transactionTypeController {
     @Autowired
     private TransactionTypeService transactionTypeService;
 
-    @GetMapping("/GetAll")
+    @GetMapping()
     public Mono<ResponseEntity<Flux<TransactionTypeDTO>>> getAll(){
         log.info("getAll executed");
         return Mono.just(ResponseEntity.ok()

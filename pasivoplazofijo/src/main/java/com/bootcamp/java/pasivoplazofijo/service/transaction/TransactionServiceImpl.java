@@ -50,17 +50,9 @@ public class TransactionServiceImpl implements TransactionService{
                     return transactionRepository.findTrxPerMoth(Funciones.GetFirstDayOfCurrentMonth()
                                     ,transactionRequestDTO.getIdProductClient()).collectList()
                             .flatMap(trxPerMonth -> {
-
-                                /*
-                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida)
-                                    return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
-                                 */
-
                                 if(transactionRequestDTO.getIdTransactionType() != Constantes.TipoTrxDeposito ||
-                                        transactionRequestDTO.getIdTransactionType() != Constantes.TipoTrxRetiro )
+                                        transactionRequestDTO.getIdTransactionType() != Constantes.TipoTrxRetiro ||
+                                        transactionRequestDTO.getIdTransactionType() != Constantes.TipoTrxTransferenciaSalida)
                                     return Mono.error(() -> new FunctionalException("Error, solo se permite transacciones de Deposito o Retiro"));
 
                                 if(transactionRequestDTO.getMont() <= 0.009)
@@ -223,6 +215,7 @@ public class TransactionServiceImpl implements TransactionService{
     public Mono<TransactionDTO> registerTrxEntrada(ProductClient productClient, Transaction transactionOrigen){
 
         transactionOrigen.setId(null);
+        transactionOrigen.setIdProductClient(productClient.getId());
         transactionOrigen.setIdTransactionType(Constantes.TipoTrxTransferenciaEntrada);
         transactionOrigen.setTransactionFee(0.00);
 

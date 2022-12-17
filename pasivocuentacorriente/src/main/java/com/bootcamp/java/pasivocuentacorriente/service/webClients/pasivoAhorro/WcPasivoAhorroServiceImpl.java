@@ -50,9 +50,9 @@ public class WcPasivoAhorroServiceImpl implements WcPasivoAhorroService {
 
     @Override
     public Mono<TransactionDTO> registerTrxEntradaExterna(TransactionDTO transactionDTO,
-                                                          String idProductClient) {
+                                                          String IdProductClient) {
         return wcPasivoAhorroTrx.post()
-                .uri("/{idProductClient}" ,idProductClient)
+                .uri("/{IdProductClient}" ,IdProductClient)
                 .body(Mono.just(transactionDTO), TransactionDTO.class)
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),

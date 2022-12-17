@@ -67,6 +67,7 @@ public class ProductClientServiceImpl implements ProductClientService{
 
     @Override
     public Mono<ProductClientDTO> findByAccountNumber(String AccountNumber) {
+        log.info("findByAccountNumber {}", AccountNumber);
         return productClientRepository.findByAccountNumber(AccountNumber)
                 .map(ProductClientConvert::EntityToDTO)
                 .switchIfEmpty(Mono.error(() -> new FunctionalException("No se encontraron registros")));
