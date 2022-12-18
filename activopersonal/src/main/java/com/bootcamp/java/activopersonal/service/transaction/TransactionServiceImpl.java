@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.Closeable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -54,8 +55,8 @@ public class TransactionServiceImpl implements TransactionService{
                                 if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
                                         transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
                                         transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida)
-                                    return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
+                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaEntrada)
+                                    return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida debe ser una transferencia de entrada"));
 
                                 if(transactionRequestDTO.getMont() <= 0.009)
                                     return Mono.error(() -> new FunctionalException("El monto debe ser mayor a 0.00"));
@@ -70,49 +71,9 @@ public class TransactionServiceImpl implements TransactionService{
                                 }
                                 transactionRequestDTO.setSourceAccountNumber(prodclient.getAccountNumber());
 
-                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
-                                        transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo)
-                                {
-                                    if((transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
-                                            transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo) &&
-                                            (prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee())) )
-                                    {
-                                        log.info("No tiene fondos suficientes para realizar la operacion");
-                                        return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
-                                    }
-                                    log.info("Trx Pasivo Ahorro Deposito, Retiro o Consumo");
-                                    transactionRequestDTO.setOwnAccountNumber(1); //A mi misma cuenta
-                                    /*Nuevas lineas */
-                                    transactionRequestDTO.setDestinationAccountNumber(null);
-                                    transactionRequestDTO.setDestinationIdProduct(Constantes.Productoactivopersonals);
-
-                                    Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
-                                    return transactionRepository.save(trx)
-                                            .flatMap(t->{
-                                                prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
-                                                        trx.getMont(),
-                                                        trx.getIdTransactionType(),
-                                                        trx.getTransactionFee()));
-
-                                                return productClientRepository.save(prodclient)
-                                                        .flatMap(x-> {
-                                                            log.info("Actualizado el balance");
-                                                            return transactionRepository.findById(t.getId())
-                                                                    .map(TransactionConvert::EntityToDTO);
-                                                        });
-                                            });
-                                }
-
-                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida)
-                                    if(prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
-                                        return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
-
-
                                 switch (transactionRequestDTO.getDestinationIdProduct()){
                                     case 1: {
                                         if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida){
-
                                             if(prodclient.getBalance() < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
                                                 return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
                                             return productClientRepository.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
@@ -137,7 +98,7 @@ public class TransactionServiceImpl implements TransactionService{
                                                                             .flatMap(x-> {
                                                                                 log.info("Actualizado el balance");
                                                                                 //AQUI AGREGAR LLAMADO AL API DE TRX
-                                                                                return registerTrxEntrada(xy,trx)
+                                                                                return registerTrxEntradaDebt(xy,trx)
                                                                                         .flatMap(xyz -> {
                                                                                             return Mono.just(transactionConverter.EntityToDTO(t));
                                                                                         });
@@ -182,6 +143,46 @@ public class TransactionServiceImpl implements TransactionService{
                                                 })
                                                 .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
                                     }
+                                    case 4: {
+                                        if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaSalida){
+                                            if((prodclient.getCreditLimit() - prodclient.getDebt()) < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
+                                                return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
+                                            return productClientRepository.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                                                    .flatMap(xy -> {
+                                                        if(xy.getAccountNumber().equals(prodclient.getAccountNumber()))
+                                                            return Mono.error(() -> new FunctionalException("No puede realizar una transferencia a su misma cuenta de origen"));
+                                                        if(xy.getDocumentNumber().equals(prodclient.getDocumentNumber())) {
+                                                            transactionRequestDTO.setOwnAccountNumber(1); //La cuenta de destino le pertenece al mismo cliente
+                                                        }else{
+                                                            transactionRequestDTO.setOwnAccountNumber(0); //La cuenta de destino NO le pertenece al mismo cliente
+                                                        }
+
+                                                        Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
+                                                        return transactionRepository.save(trx)
+                                                                .flatMap(t->{
+                                                                    prodclient.setDebt(CalculateDebt(prodclient.getDebt(),
+                                                                            trx.getMont(),
+                                                                            trx.getIdTransactionType(),
+                                                                            trx.getTransactionFee()));
+                                                                    log.info("->>>>>>>>>4");
+                                                                    log.info(prodclient.toString());
+                                                                    return productClientRepository.save(prodclient)
+                                                                            .flatMap(x-> {
+                                                                                log.info("Actualizado el balance");
+                                                                                //AQUI AGREGAR LLAMADO AL API DE TRX
+                                                                                return registerTrxEntradaDebt(xy,trx)
+                                                                                        .flatMap(xyz -> {
+                                                                                            return Mono.just(transactionConverter.EntityToDTO(t));
+                                                                                        });
+                                                                            });
+                                                                });
+                                                    })
+                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
+                                        }else {
+                                            log.info("Trx Activo Personal Otro");
+                                            return Mono.error(() -> new FunctionalException("IdTransactionType no identificado"));
+                                        }
+                                    }
                                     default: {
                                         return Mono.error(() -> new FunctionalException("El destinationIdProduct especificado no a sido implementado"));
                                     }
@@ -223,6 +224,32 @@ public class TransactionServiceImpl implements TransactionService{
         return transactionRepository.save(transactionOrigen)
                 .flatMap(x -> {
                     productClient.setBalance(CalculateBalance(productClient.getBalance(),
+                            transactionOrigen.getMont(),
+                            transactionOrigen.getIdTransactionType(),
+                            transactionOrigen.getTransactionFee()));
+                    return productClientRepository.save(productClient)
+                            .flatMap(pc -> {
+                                return Mono.just(transactionConverter.EntityToDTO(x));
+                            });
+                });
+    }
+
+    public Mono<TransactionDTO> registerTrxEntradaDebt(ProductClient productClient, Transaction transactionOrigen){
+
+        String newDestinationAccountNumber = transactionOrigen.getSourceAccountNumber();
+        String newSourceAccountNumber = transactionOrigen.getDestinationAccountNumber();
+        transactionOrigen.setId(null);
+        transactionOrigen.setIdProductClient(productClient.getId());
+        transactionOrigen.setIdTransactionType(Constantes.TipoTrxTransferenciaEntrada);
+        transactionOrigen.setDestinationAccountNumber(newDestinationAccountNumber);
+        transactionOrigen.setSourceAccountNumber(newSourceAccountNumber);
+        transactionOrigen.setTransactionFee(0.00);
+        log.info("--------->>>>>>>>>>>11111111111");
+        log.info(transactionOrigen.toString());
+
+        return transactionRepository.save(transactionOrigen)
+                .flatMap(x -> {
+                    productClient.setDebt(CalculateDebt(productClient.getDebt(),
                             transactionOrigen.getMont(),
                             transactionOrigen.getIdTransactionType(),
                             transactionOrigen.getTransactionFee()));
@@ -279,6 +306,26 @@ public class TransactionServiceImpl implements TransactionService{
         return bd.doubleValue();
     }
 
+    private Double CalculateDebt(Double ActualDebt, Double debtTrx, Integer transactionType, Double trxFee) {
+        Double newDebt = 0.00;
+        if(transactionType.equals(Constantes.TipoTrxRetiro)) //retiro
+            newDebt = ActualDebt + debtTrx + trxFee;
+
+        if(transactionType.equals(Constantes.TipoTrxDeposito)) //deposito
+            newDebt = ActualDebt - debtTrx + trxFee;
+
+        if(transactionType.equals(Constantes.TipoTrxConsumo)) //consumo
+            newDebt = ActualDebt + debtTrx + trxFee;
+
+        if(transactionType.equals(Constantes.TipoTrxTransferenciaSalida)) //Transferencia a cuenta externa
+            newDebt = ActualDebt + debtTrx + trxFee;
+
+        if(transactionType.equals(Constantes.TipoTrxTransferenciaEntrada)) //Transferencia a cuenta externa
+            newDebt = ActualDebt - debtTrx + trxFee;
+
+        BigDecimal bd = new BigDecimal(newDebt).setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
 
 
 

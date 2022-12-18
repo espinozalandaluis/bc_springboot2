@@ -9,6 +9,7 @@ public class ProductClientRequest {
     private Integer idProduct;
     private String documentNumber;
     //private Integer movementLimit;
-    private Double depositAmount;
+    //private Double depositAmount;
+    private Double creditLimit;
     private String accountNumber ;
 }

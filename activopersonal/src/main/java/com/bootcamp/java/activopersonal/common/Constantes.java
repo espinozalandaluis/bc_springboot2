@@ -9,9 +9,13 @@ import java.util.Date;
 public class Constantes {
     public static final Integer ClientTypePersonal = 1;
     public static final Integer ProductTypePasivo = 1;
+
+    public static final Integer ProductTypeActivo = 2;
     public static final Integer ProductSubTypePasivo = 1;
 
-    public static final Integer TransactionTypeDeposito = 1;
+    public static final Integer ProductSubTypeActivoCreditoPersonal = 4;
+
+    public static final Integer TransactionTypeDeposito =    1;
 
     public static final Double MaintenanceCost = 0.0;
 

@@ -91,10 +91,10 @@ public class ProductClientServiceImpl implements ProductClientService{
                                             .flatMap(producto->{
                                                 log.info("Resultado de llamar al servicio de Products: {}",producto.toString());
 
-                                                if(!producto.getProductTypeDTO().getIdProductType().equals(Constantes.ProductTypePasivo))
-                                                    return Mono.error(new FunctionalException("El producto no es Tipo Pasivo"));
-                                                if(!producto.getProductSubTypeDTO().getIdProductSubType().equals(Constantes.ProductSubTypePasivo))
-                                                    return Mono.error(new FunctionalException("El producto no es SubTipo Ahorro"));
+                                                if(!producto.getProductTypeDTO().getIdProductType().equals(Constantes.ProductTypeActivo))
+                                                    return Mono.error(new FunctionalException("El producto no es Tipo Activo"));
+                                                if(!producto.getProductSubTypeDTO().getIdProductSubType().equals(Constantes.ProductSubTypeActivoCreditoPersonal))
+                                                    return Mono.error(new FunctionalException("El producto no es SubTipo Credito Personal"));
 
                                                 return productClientRepository.findByAccountNumber(productClientRequest.getAccountNumber()).flux().collectList()
                                                         .flatMap(y->{
@@ -107,7 +107,7 @@ public class ProductClientServiceImpl implements ProductClientService{
                                                             return productClientRepository.save(prdCli)
                                                                     .flatMap(productocliente -> {
                                                                         log.info("Resultado de guardar ProductClient: {}",productocliente.toString());
-                                                                        if(productClientRequest.getDepositAmount() > 0){
+                                                                        if(productClientRequest.getCreditLimit() > 0){
                                                                             //prdCli.setTransactionFee(0.00); //Por primera transaccion no se cobra Comision
                                                                             Transaction trxEntity = transactionConvert.ProductClientEntityToTransactionEntity(prdCli);
                                                                             log.info("before save transaction trxEntity: {}",trxEntity.toString());
@@ -132,10 +132,6 @@ public class ProductClientServiceImpl implements ProductClientService{
                                                                     })
                                                                     .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el ProductClient")));
                                                         });
-
-
-
-
                                             })
                                             .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de producto")));
                                 })
