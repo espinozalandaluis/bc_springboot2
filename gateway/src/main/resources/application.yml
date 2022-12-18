@@ -25,6 +25,10 @@ spring:
           uri: lb://PASIVOCUENTACORRIENTE
           predicates:
             - Path=/v1/pasivocuentacorriente/transaction/**,/v1/pasivocuentacorriente/transactionType/**,/v1/pasivocuentacorriente/**,/v1/pasivocuentacorriente/getByDocumentNumber/**,/v1/pasivocuentacorriente/getByAccountNumber/**,
+        - id: activopersonal
+          uri: lb://ACTIVOPERSONAL
+          predicates:
+            - Path=/v1/activopersonal/**,/v1/activopersonal/transaction/**,/v1/activopersonal/transactionType/**
       discovery:
         locator:
           enabled: true
