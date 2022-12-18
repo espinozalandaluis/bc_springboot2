@@ -1,6 +1,8 @@
-package com.bootcamp.java.activoempresarial.service.webClients.product;
+package com.bootcamp.java.activoempresarial.service.webClients.Clients;
 
-import com.bootcamp.java.activoempresarial.dto.webclients.product.ProductResponseDTO;
+import com.bootcamp.java.activoempresarial.common.Constantes;
+import com.bootcamp.java.activoempresarial.dto.webClientDTO.ClientResponseDTO;
+import com.bootcamp.java.activoempresarial.service.webClients.Clients.WcClientsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -18,54 +20,47 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class WcProductsServiceImpl implements  WcProductsService{
+public class WcClientsServiceImpl implements WcClientsService {
 
+    private final WebClient wcClients = WebClient.builder()
+            .baseUrl(Constantes.WebClientUriMSCliente)
+            .defaultCookie("cookieKey", "cookieValue")
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
 
     @Override
-    public Flux<ProductResponseDTO> findAll() {
-        WebClient client2 = WebClient.builder()
-                .baseUrl("http://localhost:8081/v1/product")
-                .defaultCookie("cookieKey", "cookieValue")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-
-        Flux<ProductResponseDTO> dataProductResponseDTO =  client2.get()
+    public Flux<ClientResponseDTO> findAll() {
+        return wcClients.get()
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
                         response -> response.bodyToMono(String.class)
                                 .map(Exception::new))
-                .bodyToFlux(ProductResponseDTO.class);
-
-        log.info("dataProductResponseDTO: {}",dataProductResponseDTO);
-
-        return client2.get()
-                .retrieve()
-                .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
-                        response -> response.bodyToMono(String.class)
-                                .map(Exception::new))
-                .bodyToFlux(ProductResponseDTO.class)
+                .bodyToFlux(ClientResponseDTO.class)
                 .timeout(Duration.ofMillis(10_000));
-
-
     }
 
     @Override
-    public Mono<ProductResponseDTO> findById(Integer IdProduct) {
-        log.info("El idProducto consultado es: {}",IdProduct.toString());
-        WebClient client2 = WebClient.builder()
-                .baseUrl("http://localhost:8081/v1/product/"+ IdProduct)
-                .defaultCookie("cookieKey", "cookieValue")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
-
-
-
-        return client2.get()
+    public Mono<ClientResponseDTO> findById(Integer IdClient) {
+        return wcClients.get()
+                .uri("/{IdClient}" ,IdClient)
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
                         response -> response.bodyToMono(String.class)
                                 .map(Exception::new))
-                .bodyToMono(ProductResponseDTO.class)
+                .bodyToMono(ClientResponseDTO.class)
                 .timeout(Duration.ofMillis(10_000));
     }
+
+    @Override
+    public Mono<ClientResponseDTO> findByDocumentNumber(String documentNumber) {
+        return wcClients.get()
+                .uri("/{documentNumber}" ,documentNumber)
+                .retrieve()
+                .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
+                        response -> response.bodyToMono(String.class)
+                                .map(Exception::new))
+                .bodyToMono(ClientResponseDTO.class)
+                .timeout(Duration.ofMillis(10_000));
+    }
+
 }

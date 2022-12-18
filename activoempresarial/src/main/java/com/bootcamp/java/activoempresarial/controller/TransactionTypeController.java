@@ -1,28 +1,29 @@
 package com.bootcamp.java.activoempresarial.controller;
 
+import com.bootcamp.java.activoempresarial.dto.TransactionDTO;
 import com.bootcamp.java.activoempresarial.dto.TransactionTypeDTO;
 import com.bootcamp.java.activoempresarial.service.transactionType.TransactionTypeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.validation.Valid;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/transactionType")
-public class TransactionTypeController {
+@RequestMapping("/v1/activoempresarial/transactionType")
+public class transactionTypeController {
 
     @Autowired
     private TransactionTypeService transactionTypeService;
 
-
-    @GetMapping()
+    @GetMapping("/GetAll")
     public Mono<ResponseEntity<Flux<TransactionTypeDTO>>> getAll(){
         log.info("getAll executed");
         return Mono.just(ResponseEntity.ok()
@@ -36,4 +37,5 @@ public class TransactionTypeController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.noContent().build());
     }
+
 }

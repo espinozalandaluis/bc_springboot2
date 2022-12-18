@@ -1,4 +1,4 @@
-package com.bootcamp.java.activoempresarial.common.exception;
+package com.bootcamp.java.activoempresarial.common.exceptionHandler;
 
 public class FunctionalException extends RuntimeException{
     public FunctionalException(String messageError){

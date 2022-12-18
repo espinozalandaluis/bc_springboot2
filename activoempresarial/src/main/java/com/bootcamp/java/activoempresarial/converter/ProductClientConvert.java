@@ -1,16 +1,16 @@
 package com.bootcamp.java.activoempresarial.converter;
 
+import com.bootcamp.java.activoempresarial.common.Constantes;
 import com.bootcamp.java.activoempresarial.dto.ProductClientDTO;
-import com.bootcamp.java.activoempresarial.dto.webclients.client.ClientResponseDTO;
-import com.bootcamp.java.activoempresarial.dto.webclients.product.ProductResponseDTO;
-import com.bootcamp.java.activoempresarial.entity.ProductClientEntity;
-import com.bootcamp.java.activoempresarial.model.MembershipRequestModel;
+import com.bootcamp.java.activoempresarial.dto.ProductClientRequest;
+import com.bootcamp.java.activoempresarial.dto.webClientDTO.ClientResponseDTO;
+import com.bootcamp.java.activoempresarial.dto.webClientDTO.ProductResponseDTO;
+import com.bootcamp.java.activoempresarial.entity.ProductClient;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProductClientConvert {
-
-    public static ProductClientDTO EntityToDTO(ProductClientEntity productClient) {
+    public static ProductClientDTO EntityToDTO(ProductClient productClient) {
         return ProductClientDTO.builder()
                 .id(productClient.getId())
                 .idProduct(productClient.getIdProduct())
@@ -33,12 +33,44 @@ public class ProductClientConvert {
                 .maintenanceCost(productClient.getMaintenanceCost())
                 .movementLimit(productClient.getMovementLimit())
                 .credits(productClient.getCredits())
+                .accountNumber(productClient.getAccountNumber())
+                .transactionFee(productClient.getTransactionFee())
+                .creditCardNumber(productClient.getCreditCardNumber())
                 .build();
     }
 
-    public static ProductClientEntity DTOToEntity(ProductClientDTO productClientDTO) {
-        return ProductClientEntity.builder()
-                .id(productClientDTO.getId())
+    public static ProductClient DTOToEntity2(ProductClientRequest productClientRequest,
+                                            ProductResponseDTO productResponseDTO,
+                                            ClientResponseDTO clientResponseDTO) {
+        return ProductClient.builder()
+                .idProduct(productResponseDTO.getIdProduct())
+                .productDescription(productResponseDTO.getDescription())
+                .idProductType(productResponseDTO.getProductTypeDTO().getIdProductType())
+                .productTypeDescription(productResponseDTO.getProductTypeDTO().getDescription())
+                .idProductSubType(productResponseDTO.getProductSubTypeDTO().getIdProductSubType())
+                .productSubTypeDescription(productResponseDTO.getProductSubTypeDTO().getDescription())
+                .idClient(clientResponseDTO.getIdClient())
+                .idClientType(clientResponseDTO.getClientTypeDTO().getIdClientType())
+                .clientTypeDescription(clientResponseDTO.getClientTypeDTO().getDescription())
+                .idClientDocumentType(clientResponseDTO.getClientDocumentTypeDTO().getIdClientDocumentType())
+                .clientDocumentTypeDescription(clientResponseDTO.getClientDocumentTypeDTO().getDescription())
+                .documentNumber(clientResponseDTO.getDocumentNumber())
+                .fullName(clientResponseDTO.getFullName())
+                //.authorizedSigners(productClientDTO.getAuthorizedSigners())
+                .creditLimit(productClientRequest.getCreditLimit())
+                //.balance(productClientRequest.getDepositAmount())
+                .debt(0.0)
+                .maintenanceCost(Constantes.MaintenanceCost)
+                .movementLimit(productResponseDTO.getProductSubTypeDTO().getMovementLimit())
+                //.credits(productClientDTO.getCredits())
+                .accountNumber(productClientRequest.getAccountNumber())
+                .transactionFee(productResponseDTO.getTransactionFee())
+                //.creditCardNumber(productClient.getCreditCardNumber())
+                .build();
+    }
+
+    public static ProductClient DTOToEntity(ProductClientDTO productClientDTO) {
+        return ProductClient.builder()
                 .idProduct(productClientDTO.getIdProduct())
                 .productDescription(productClientDTO.getProductDescription())
                 .idProductType(productClientDTO.getIdProductType())
@@ -59,33 +91,11 @@ public class ProductClientConvert {
                 .maintenanceCost(productClientDTO.getMaintenanceCost())
                 .movementLimit(productClientDTO.getMovementLimit())
                 .credits(productClientDTO.getCredits())
+                .accountNumber(productClientDTO.getAccountNumber())
+                .transactionFee(productClientDTO.getTransactionFee())
+                .creditCardNumber(productClientDTO.getCreditCardNumber())
                 .build();
     }
 
-    public static ProductClientEntity PopulateProductClientEntityActive(ClientResponseDTO client,
-                                                                 ProductResponseDTO product,
-                                                                 MembershipRequestModel membership){
-        return ProductClientEntity.builder()
-                .idClient(client.getIdClient())
-                .idProduct(membership.getIdProduct())
-                .productDescription(product.getDescription())
-                .idProductType(product.getProductTypeDTO().getIdProductType())
-                .productTypeDescription(product.getProductTypeDTO().getDescription())
-                .idProductSubType(product.getProductSubTypeDTO().getIdProductSubType())
-                .productSubTypeDescription(product.getProductSubTypeDTO().getDescription())
-                .idClientType(client.getClientTypeDTO().getIdClientType())
-                .clientTypeDescription(client.getClientTypeDTO().getDescription())
-                .idClientDocumentType(client.getClientDocumentTypeDTO().getIdClientDocumentType())
-                .clientDocumentTypeDescription(client.getClientDocumentTypeDTO().getDescription())
-                .documentNumber(membership.getDocumentNumber())
-                .fullName(client.getFullName())
-                .authorizedSigners(membership.getAuthorizedSigners())
-                .creditLimit(membership.getCreditLimit())
-                .balance(membership.getBalance())
-                .debt(0.0)
-                .maintenanceCost(0.0)
-                .movementLimit(0)
-                .credits(0)
-                .build();
-    }
+
 }

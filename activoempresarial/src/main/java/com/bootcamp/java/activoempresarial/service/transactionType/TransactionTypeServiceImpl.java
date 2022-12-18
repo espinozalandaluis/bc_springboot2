@@ -11,11 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Calendar;
+import java.util.Date;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class TransactionTypeServiceImpl implements TransactionTypeService {
+public class TransactionTypeServiceImpl implements TransactionTypeService{
+
+
 
     @Autowired
     private TransactionTypeRepository transactionTypeRepository;
@@ -26,6 +31,19 @@ public class TransactionTypeServiceImpl implements TransactionTypeService {
     @Override
     public Flux<TransactionTypeDTO> findAll() {
         log.debug("findAll executing");
+/*
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        // set day to minimum
+        calendar.set(Calendar.DAY_OF_MONTH,
+                calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        log.info("Calendar date: " + calendar.getTime());
+*/
         Flux<TransactionTypeDTO> dataProductTypeDTO = transactionTypeRepository.findAll()
                 .map(TransactionTypeConvert::EntityToDTO);
         return dataProductTypeDTO;

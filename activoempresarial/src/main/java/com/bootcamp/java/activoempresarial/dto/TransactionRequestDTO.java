@@ -5,24 +5,33 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransactionDTO {
+public class TransactionRequestDTO {
+    @JsonIgnore
     private String id;
+
     private String idProductClient;
     private Integer idTransactionType;
     private Double mont;
+
+    @JsonIgnore
     private Date registrationDate;
-    private Double transactionFee;
-    private String destinationAccountNumber;
+
+    @JsonIgnore
     private String sourceAccountNumber;
-    private Integer ownAccountNumber;
+
+    @JsonIgnore
+    private Integer OwnAccountNumber;
+
+    private String destinationAccountNumber;
     private Integer destinationIdProduct;
+
+    @JsonIgnore
+    private Double transactionFee;
 }

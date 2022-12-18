@@ -1,9 +1,6 @@
 package com.bootcamp.java.activoempresarial.controller;
 
-import com.bootcamp.java.activoempresarial.dto.ProductClientDTO;
-import com.bootcamp.java.activoempresarial.dto.ProductClientTransactionDTO;
-import com.bootcamp.java.activoempresarial.dto.TransactionDTO;
-import com.bootcamp.java.activoempresarial.model.MembershipRequestModel;
+import com.bootcamp.java.activoempresarial.dto.*;
 import com.bootcamp.java.activoempresarial.service.productClient.ProductClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +15,19 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/Afiliacion")
-public class ProductClientController {
+@RequestMapping("/v1/activoempresarial")
+public class productClientController {
 
     @Autowired
     private ProductClientService productClientService;
+
+    @PostMapping
+    public Mono<ResponseEntity<ProductClientTransactionDTO>> Afiliar(@Valid @RequestBody ProductClientRequest productClientRequest) {
+        log.info("create executed {}", productClientRequest);
+        return productClientService.create(productClientRequest)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
     @GetMapping()
     public Mono<ResponseEntity<Flux<ProductClientDTO>>> getAll(){
@@ -31,19 +36,19 @@ public class ProductClientController {
                 .body(productClientService.findAll()));
     }
 
-    @GetMapping("/{id}")
-    public Mono<ResponseEntity<ProductClientDTO>> getById(@PathVariable String id){
-        log.info("getById executed {}", id);
-        return productClientService.findById(id)
+    @GetMapping("/{documentNumber}")
+    public Mono<ResponseEntity<Flux<ProductClientDTO>>> getByDocumentNumber(@PathVariable String documentNumber){
+        log.info("getByDocumentNumber executed {}", documentNumber);
+        return Mono.just(ResponseEntity.ok()
+                .body(productClientService.findByDocumentNumber(documentNumber)));
+    }
+
+    @GetMapping("/{accountNumber}")
+    public Mono<ResponseEntity<ProductClientDTO>> findByAccountNumber(@PathVariable String accountNumber){
+        log.info("findByAccountNumber executed {}", accountNumber);
+        return productClientService.findByAccountNumber(accountNumber)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.noContent().build());
     }
 
-    @PostMapping
-    public Mono<ResponseEntity<ProductClientTransactionDTO>> create(@Valid @RequestBody MembershipRequestModel afiliacionRequestModel){
-        log.info("create excecuted {}",afiliacionRequestModel);
-        return productClientService.create(afiliacionRequestModel)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
 }

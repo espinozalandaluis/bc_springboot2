@@ -1,11 +1,8 @@
 package com.bootcamp.java.activoempresarial.controller;
 
-import com.bootcamp.java.activoempresarial.dto.ProductClientDTO;
-import com.bootcamp.java.activoempresarial.dto.ProductClientTransactionDTO;
-import com.bootcamp.java.activoempresarial.dto.TransactionDTO;
-import com.bootcamp.java.activoempresarial.model.MembershipRequestModel;
-import com.bootcamp.java.activoempresarial.model.TransactionRequestModel;
+import com.bootcamp.java.activoempresarial.dto.*;
 import com.bootcamp.java.activoempresarial.service.transaction.TransactionService;
+import com.bootcamp.java.activoempresarial.service.transactionType.TransactionTypeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,33 +16,36 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/v1/transaction")
-public class TransactionController {
+@RequestMapping("/v1/activoempresarial/transaction")
+public class transactionController {
 
     @Autowired
     private TransactionService transactionService;
 
-
     @GetMapping()
-    public Mono<ResponseEntity<Flux<TransactionDTO>>> getAll(){
-        log.info("getAll executed");
+    public Mono<ResponseEntity<Flux<TransactionDTO>>> getAllTrx(){
+        log.info("getAll TransactionDTO executed");
         return Mono.just(ResponseEntity.ok()
                 .body(transactionService.findAll()));
     }
 
-    @GetMapping("/{id}")
-    public Mono<ResponseEntity<TransactionDTO>> getById(@PathVariable String id){
-        log.info("getById executed {}", id);
-        return transactionService.findById(id)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.noContent().build());
+    @GetMapping("/{documentNumber}")
+    public Mono<ResponseEntity<Flux<ProductClientTransactionDTO2>>> getByDocumentNumber(@PathVariable String documentNumber){
+        log.info("getByDocumentNumber executed {}", documentNumber);
+        return Mono.just(ResponseEntity.ok()
+                .body(transactionService.findByDocumentNumber(documentNumber)));
     }
 
     @PostMapping
-    public Mono<ResponseEntity<ProductClientTransactionDTO>> create(@Valid @RequestBody TransactionRequestModel transactionRequestModel){
-        log.info("create excecuted {}",transactionRequestModel);
-        return transactionService.create(transactionRequestModel)
+    public Mono<ResponseEntity<TransactionDTO>> createTrx(@Valid @RequestBody TransactionRequestDTO transactionRequestDTO) {
+        log.info("create transactionRequestDTO executed {}", transactionRequestDTO);
+        return transactionService.register(transactionRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+
+
+
+
 }

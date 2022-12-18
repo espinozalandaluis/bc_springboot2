@@ -10,11 +10,12 @@ import javax.validation.constraints.NotNull;
 @Data
 @Builder
 @ToString
-@EqualsAndHashCode(of = {"id"})
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"accountNumber"})
 @Document(value = "tbl_ProductClient")
-public class ProductClientEntity {
+public class ProductClient {
+
     @Id
     private String id;
 
@@ -61,7 +62,7 @@ public class ProductClientEntity {
     private String authorizedSigners;
 
     @NotNull
-    private Integer creditLimit;
+    private Double creditLimit;
 
     @NotNull
     private Double balance;
@@ -77,5 +78,15 @@ public class ProductClientEntity {
 
     @NotNull
     private Integer credits;
+
+    @NotNull
+    @Indexed(unique = true)
+    private String accountNumber;
+
+    @NotNull
+    private Double transactionFee;
+
+    @NotNull
+    private String creditCardNumber;
 
 }

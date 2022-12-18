@@ -1,4 +1,4 @@
-package com.bootcamp.java.activoempresarial.dto.webclients.product;
+package com.bootcamp.java.activoempresarial.dto.webClientDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,14 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductSubTypeDTO {
-
+public class ProductTypeDTO {
     private String id;
-    private Integer idProductSubType;
     private Integer idProductType;
     private String description;
-    private Double maintenanceCost;
-    private Integer movementLimit;
-    private Integer credits;
-
 }

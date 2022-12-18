@@ -1,55 +1,79 @@
 package com.bootcamp.java.activoempresarial.converter;
 
+import com.bootcamp.java.activoempresarial.common.Constantes;
+import com.bootcamp.java.activoempresarial.common.Funciones;
 import com.bootcamp.java.activoempresarial.dto.TransactionDTO;
-import com.bootcamp.java.activoempresarial.entity.ProductClientEntity;
-import com.bootcamp.java.activoempresarial.entity.TransactionEntity;
-import com.bootcamp.java.activoempresarial.model.MembershipRequestModel;
-import com.bootcamp.java.activoempresarial.model.TransactionRequestModel;
+import com.bootcamp.java.activoempresarial.dto.TransactionRequestDTO;
+import com.bootcamp.java.activoempresarial.dto.TransactionTypeDTO;
+import com.bootcamp.java.activoempresarial.dto.TransationResponseDTO;
+import com.bootcamp.java.activoempresarial.entity.ProductClient;
+import com.bootcamp.java.activoempresarial.entity.Transaction;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 @Component
+@Slf4j
 public class TransactionConvert {
-
-    public static TransactionDTO EntityToDTO(TransactionEntity transaction) {
-        return TransactionDTO.builder()
+    public static TransactionDTO EntityToDTO(Transaction transaction) {
+        TransactionDTO trxDTO = TransactionDTO.builder()
                 .id(transaction.getId())
                 .idProductClient(transaction.getIdProductClient())
                 .idTransactionType(transaction.getIdTransactionType())
                 .mont(transaction.getMont())
                 .registrationDate(transaction.getRegistrationDate())
+                .destinationAccountNumber(transaction.getDestinationAccountNumber())
+                .sourceAccountNumber(transaction.getSourceAccountNumber())
+                .ownAccountNumber(transaction.getOwnAccountNumber())
+                .transactionFee(transaction.getTransactionFee())
+                .destinationIdProduct(transaction.getDestinationIdProduct())
                 .build();
+
+        log.info("TransactionDTO: {}", trxDTO);
+
+        return trxDTO;
     }
 
-    public static TransactionEntity DTOToEntity(TransactionDTO transactionDTO) {
-        return TransactionEntity.builder()
-                .id(transactionDTO.getId())
+    public static Transaction DTOtoEntity(TransactionDTO transactionDTO) {
+        Transaction trx =  Transaction.builder()
                 .idProductClient(transactionDTO.getIdProductClient())
+                .idTransactionType(transactionDTO.getIdTransactionType())
                 .mont(transactionDTO.getMont())
-                .registrationDate(transactionDTO.getRegistrationDate())
+                .registrationDate(Funciones.GetCurrentDate())
+                .destinationAccountNumber(transactionDTO.getDestinationAccountNumber())
+                .sourceAccountNumber(transactionDTO.getSourceAccountNumber())
+                .ownAccountNumber(transactionDTO.getOwnAccountNumber())
+                .transactionFee(transactionDTO.getTransactionFee())
+                .build();
+        return trx;
+    }
+
+    public static Transaction DTOtoEntity(TransactionRequestDTO transactionRequestDTO) {
+        Transaction trx =  Transaction.builder()
+                .idProductClient(transactionRequestDTO.getIdProductClient())
+                .idTransactionType(transactionRequestDTO.getIdTransactionType())
+                .mont(transactionRequestDTO.getMont())
+                .registrationDate(Funciones.GetCurrentDate())
+                .destinationAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                .sourceAccountNumber(transactionRequestDTO.getSourceAccountNumber())
+                .ownAccountNumber(transactionRequestDTO.getOwnAccountNumber())
+                .transactionFee(transactionRequestDTO.getTransactionFee())
+                .destinationIdProduct(transactionRequestDTO.getDestinationIdProduct())
+                .build();
+        return trx;
+    }
+
+    public static Transaction ProductClientEntityToTransactionEntity(ProductClient productClient) {
+        return Transaction.builder()
+                .idProductClient(productClient.getId())
+                .idTransactionType(Constantes.TransactionTypeDeposito)
+                .mont(productClient.getBalance())
+                .registrationDate(Funciones.GetCurrentDate())
+                .destinationAccountNumber(productClient.getAccountNumber())
+                .sourceAccountNumber(productClient.getAccountNumber())
+                .ownAccountNumber(Constantes.TransferenciasPropiaCuenta)
+                .transactionFee(productClient.getTransactionFee())
                 .build();
     }
 
-    public static TransactionEntity ModelToEntity(TransactionRequestModel transactionRequestModel) {
-        Date currentDate = new Date();
-        return TransactionEntity.builder()
-                .idProductClient(transactionRequestModel.getIdProductClient())
-                .idTransactionType(transactionRequestModel.getIdTransactionType())
-                .mont(transactionRequestModel.getMont())
-                .registrationDate(currentDate)
-                .build();
-    }
 
-    public static TransactionEntity PopulateProductClientEntityActive(ProductClientEntity productClientEntity,
-                                                                      MembershipRequestModel membership,
-                                                                      Integer idTransactionType){
-        Date currentDate = new Date();
-        return TransactionEntity.builder()
-                .idProductClient(productClientEntity.getId())
-                .idTransactionType(idTransactionType)
-                .mont(membership.getBalance())
-                .registrationDate(currentDate)
-                .build();
-    }
 }

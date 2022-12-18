@@ -21,11 +21,13 @@ public class ProductClientDTO {
     private String documentNumber;
     private String fullName;
     private String authorizedSigners;
-    private Integer creditLimit;
+    private Double creditLimit;
     private Double balance;
     private Double debt;
     private Double maintenanceCost;
     private Integer movementLimit;
     private Integer credits;
-
+    private String accountNumber;
+    private Double transactionFee;
+    private String creditCardNumber;
 }

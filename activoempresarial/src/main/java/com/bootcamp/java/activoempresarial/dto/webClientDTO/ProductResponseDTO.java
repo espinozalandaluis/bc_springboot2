@@ -1,16 +1,19 @@
-package com.bootcamp.java.activoempresarial.dto.webclients.product;
+package com.bootcamp.java.activoempresarial.dto.webClientDTO;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class ProductResponseDTO {
     private String id;
     private Integer idProduct;
     private String description;
     private ProductTypeDTO productTypeDTO;
     private ProductSubTypeDTO productSubTypeDTO;
+    private Double transactionFee;
 }

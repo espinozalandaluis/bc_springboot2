@@ -1,4 +1,4 @@
-package com.bootcamp.java.activoempresarial.dto.webclients.client;
+package com.bootcamp.java.activoempresarial.dto.webClientDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClientTypeDTO {
+public class ClientDocumentTypeDTO {
 
     private String id;
-
-    private int idClientType;
-
+    private int idClientDocumentType;
     private String description;
 }

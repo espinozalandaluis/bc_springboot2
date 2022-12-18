@@ -1,17 +1,19 @@
 package com.bootcamp.java.activoempresarial.service.productClient;
 
 import com.bootcamp.java.activoempresarial.dto.ProductClientDTO;
+import com.bootcamp.java.activoempresarial.dto.ProductClientRequest;
 import com.bootcamp.java.activoempresarial.dto.ProductClientTransactionDTO;
-import com.bootcamp.java.activoempresarial.dto.TransactionDTO;
-import com.bootcamp.java.activoempresarial.model.MembershipRequestModel;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ProductClientService {
+
     public Flux<ProductClientDTO> findAll();
 
-    public Mono<ProductClientDTO> findById(String Id);
+    public Flux<ProductClientDTO> findByDocumentNumber(String DocumentNumber);
 
-    public Mono<ProductClientTransactionDTO> create(MembershipRequestModel membershipRequestModel);
+    public Mono<ProductClientDTO> findByAccountNumber(String AccountNumber);
+
+    public Mono<ProductClientTransactionDTO> create(ProductClientRequest productClientRequest);
 
 }

@@ -1,6 +1,6 @@
-package com.bootcamp.java.activoempresarial.service.webClients.product;
+package com.bootcamp.java.activoempresarial.service.webClients.Products;
 
-import com.bootcamp.java.activoempresarial.dto.webclients.product.ProductResponseDTO;
+import com.bootcamp.java.activoempresarial.dto.webClientDTO.ProductResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

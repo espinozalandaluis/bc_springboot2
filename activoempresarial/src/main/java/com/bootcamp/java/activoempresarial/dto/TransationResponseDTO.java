@@ -5,12 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransactionTypeDTO {
+public class TransationResponseDTO {
     private String id;
-    private Integer idTransactionType;
-    private String description;
+    private String idProductClient;
+    private TransactionTypeDTO transactionTypeDTO;
+    private Double mont;
+    private Date registrationDate;
 }
