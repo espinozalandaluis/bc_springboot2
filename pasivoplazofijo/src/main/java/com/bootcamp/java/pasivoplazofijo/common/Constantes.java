@@ -18,10 +18,6 @@ public class Constantes {
 
     public static final String WebClientUriMSProducto = "http://localhost:8080/v1/product";
 
-    public static final String WebClientUriMSPasivoCuentaCorriente = "http://localhost:8080/v1/pasivocuentacorriente";
-
-    public static final String WebClientUriMSPasivoCuentaCorrienteTrx = "http://localhost:8080/v1/pasivoahorro/transaction";
-
     public static final Integer TransferenciasPropiaCuenta = 1;
 
     public static final Integer TipoTrxDeposito = 1;
@@ -38,4 +34,28 @@ public class Constantes {
     public static final Integer ProductoActivoTarjetaCredito = 6;
 
     public static final long TimeOutWebClients = 10_000;
+
+
+    //Products Pasivo
+    public static final String WebClientUriMSPasivoCuentaCorriente = "http://localhost:8080/v1/pasivocuentacorriente/getByAccountNumber";
+    public static final String WebClientUriMSPasivoCuentaCorrienteTrx = "http://localhost:8080/v1/pasivocuentacorriente/externalTransaction";
+
+    public static final String WebClientUriMSPasivoAhorro = "http://localhost:8080/v1/pasivocuentacorriente/getByAccountNumber";
+    public static final String WebClientUriMSPasivoAhorroTrx = "http://localhost:8080/v1/pasivocuentacorriente/externalTransaction";
+
+
+    //Products Activos
+    public static final String WebClientUriMSActivoTarjetaCredito = "http://localhost:8080/v1/activotarjetacredito/getByAccountNumber";
+    public static final String WebClientUriMSActivoTarjetaCreditoTrx = "http://localhost:8080/v1/activotarjetacredito/externalTransaction";
+
+    public static final String WebClientUriMSActivoCreditoPersonal = "http://localhost:8080/v1/activocreditopersonal/getByAccountNumber";
+    public static final String WebClientUriMSActivoCreditoPersonalTrx = "http://localhost:8080/v1/activocreditopersonal/externalTransaction";
+
+    public static final String WebClientUriMSActivoCreditoEmpresarial = "http://localhost:8080/v1/activocreditoempresarial/getByAccountNumber";
+    public static final String WebClientUriMSActivoCreditoEmpresarialTrx = "http://localhost:8080/v1/activocreditoempresarial/externalTransaction";
+
+    //Para consulta de tarjeta de credito
+    public static final String WebClientUriMSActivoTarjetaCreditoDocumentNumber = "http://localhost:8080/v1/activotarjetacredito/getByDocumentNumber";
+
+
 }

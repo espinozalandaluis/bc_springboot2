@@ -10,7 +10,11 @@ import com.bootcamp.java.pasivoahorro.entity.ProductClient;
 import com.bootcamp.java.pasivoahorro.entity.Transaction;
 import com.bootcamp.java.pasivoahorro.repository.ProductClientRepository;
 import com.bootcamp.java.pasivoahorro.repository.TransactionRepository;
+import com.bootcamp.java.pasivoahorro.service.webClients.activoCreditoEmpresarial.WcActivoCreditoEmpresarialService;
+import com.bootcamp.java.pasivoahorro.service.webClients.activoCreditoPersonal.WcActivoCreditoPersonalService;
+import com.bootcamp.java.pasivoahorro.service.webClients.activoTarjetaCredito.WcActivoTarjetaCreditoService;
 import com.bootcamp.java.pasivoahorro.service.webClients.pasivoCuentaCorriente.WcPasivoCuentaCorrienteService;
+import com.bootcamp.java.pasivoahorro.service.webClients.pasivoPlazoFijo.WcPasivoPlazoFijoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +46,18 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Autowired
     WcPasivoCuentaCorrienteService wcPasivoCuentaCorrienteService;
+
+    @Autowired
+    WcPasivoPlazoFijoService wcPasivoPlazoFijoService;
+
+    @Autowired
+    WcActivoCreditoPersonalService wcActivoCreditoPersonalService;
+
+    @Autowired
+    WcActivoCreditoEmpresarialService wcActivoCreditoEmpresarialService;
+
+    @Autowired
+    WcActivoTarjetaCreditoService wcActivoTarjetaCreditoService;
 
     @Override
     public Mono<TransactionDTO> register(TransactionRequestDTO transactionRequestDTO) {
@@ -186,6 +202,154 @@ public class TransactionServiceImpl implements TransactionService{
                                                 })
                                                 .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
                                     }
+                                    case 3: {
+                                        log.info("Trx Pasivo Ahorro hacia Plazo Fijo");
+                                        return wcPasivoPlazoFijoService.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                                                .flatMap(xy -> {
+                                                    log.info("Encontro cuenta de destino {}", xy.toString());
+
+                                                    if(xy.getDocumentNumber().equals(prodclient.getDocumentNumber())) {
+
+                                                        transactionRequestDTO.setOwnAccountNumber(1); //La cuenta de destino le pertenece al mismo cliente
+                                                    }else{
+                                                        transactionRequestDTO.setOwnAccountNumber(0); //La cuenta de destino NO le pertenece al mismo cliente
+                                                    }
+                                                    log.info("OwnAccountNumber {}", transactionRequestDTO.getOwnAccountNumber());
+
+                                                    Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
+                                                    return transactionRepository.save(trx)
+                                                            .flatMap(t->{
+                                                                prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
+                                                                        trx.getMont(),
+                                                                        trx.getIdTransactionType(),
+                                                                        trx.getTransactionFee()));
+
+                                                                return productClientRepository.save(prodclient)
+                                                                        .flatMap(x-> {
+                                                                            log.info("Actualizado el balance");
+                                                                            //AQUI AGREGAR LLAMADO AL API DE TRX
+                                                                            return wcPasivoPlazoFijoService.registerTrxEntradaExterna(transactionConverter.EntityToDTO(trx),
+                                                                                            xy.getId())
+                                                                                    .flatMap(z -> {
+                                                                                        return Mono.just(transactionConverter.EntityToDTO(t));
+                                                                                    })
+                                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Error al registrar la trx en el API PasivoCuentaCorrienteService")));
+                                                                        });
+                                                            });
+                                                })
+                                                .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
+                                    }
+                                    case 4: {
+                                        log.info("Trx Pasivo Ahorro hacia Credito Personal");
+                                        return wcActivoCreditoPersonalService.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                                                .flatMap(xy -> {
+                                                    log.info("Encontro cuenta de destino {}", xy.toString());
+
+                                                    if(xy.getDocumentNumber().equals(prodclient.getDocumentNumber())) {
+
+                                                        transactionRequestDTO.setOwnAccountNumber(1); //La cuenta de destino le pertenece al mismo cliente
+                                                    }else{
+                                                        transactionRequestDTO.setOwnAccountNumber(0); //La cuenta de destino NO le pertenece al mismo cliente
+                                                    }
+                                                    log.info("OwnAccountNumber {}", transactionRequestDTO.getOwnAccountNumber());
+
+                                                    Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
+                                                    return transactionRepository.save(trx)
+                                                            .flatMap(t->{
+                                                                prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
+                                                                        trx.getMont(),
+                                                                        trx.getIdTransactionType(),
+                                                                        trx.getTransactionFee()));
+
+                                                                return productClientRepository.save(prodclient)
+                                                                        .flatMap(x-> {
+                                                                            log.info("Actualizado el balance");
+                                                                            //AQUI AGREGAR LLAMADO AL API DE TRX
+                                                                            return wcActivoCreditoPersonalService.registerTrxEntradaExterna(transactionConverter.EntityToDTO(trx),
+                                                                                            xy.getId())
+                                                                                    .flatMap(z -> {
+                                                                                        return Mono.just(transactionConverter.EntityToDTO(t));
+                                                                                    })
+                                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Error al registrar la trx en el API PasivoCuentaCorrienteService")));
+                                                                        });
+                                                            });
+                                                })
+                                                .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
+                                    }
+                                    case 5: {
+                                        log.info("Trx Pasivo Ahorro hacia Credito Empresarial");
+                                        return wcActivoCreditoEmpresarialService.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                                                .flatMap(xy -> {
+                                                    log.info("Encontro cuenta de destino {}", xy.toString());
+
+                                                    if(xy.getDocumentNumber().equals(prodclient.getDocumentNumber())) {
+
+                                                        transactionRequestDTO.setOwnAccountNumber(1); //La cuenta de destino le pertenece al mismo cliente
+                                                    }else{
+                                                        transactionRequestDTO.setOwnAccountNumber(0); //La cuenta de destino NO le pertenece al mismo cliente
+                                                    }
+                                                    log.info("OwnAccountNumber {}", transactionRequestDTO.getOwnAccountNumber());
+
+                                                    Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
+                                                    return transactionRepository.save(trx)
+                                                            .flatMap(t->{
+                                                                prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
+                                                                        trx.getMont(),
+                                                                        trx.getIdTransactionType(),
+                                                                        trx.getTransactionFee()));
+
+                                                                return productClientRepository.save(prodclient)
+                                                                        .flatMap(x-> {
+                                                                            log.info("Actualizado el balance");
+                                                                            //AQUI AGREGAR LLAMADO AL API DE TRX
+                                                                            return wcActivoCreditoEmpresarialService.registerTrxEntradaExterna(transactionConverter.EntityToDTO(trx),
+                                                                                            xy.getId())
+                                                                                    .flatMap(z -> {
+                                                                                        return Mono.just(transactionConverter.EntityToDTO(t));
+                                                                                    })
+                                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Error al registrar la trx en el API PasivoCuentaCorrienteService")));
+                                                                        });
+                                                            });
+                                                })
+                                                .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
+                                    }
+                                    case 6: {
+                                        log.info("Trx Pasivo Ahorro hacia Credito Empresarial");
+                                        return wcActivoTarjetaCreditoService.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                                                .flatMap(xy -> {
+                                                    log.info("Encontro cuenta de destino {}", xy.toString());
+
+                                                    if(xy.getDocumentNumber().equals(prodclient.getDocumentNumber())) {
+
+                                                        transactionRequestDTO.setOwnAccountNumber(1); //La cuenta de destino le pertenece al mismo cliente
+                                                    }else{
+                                                        transactionRequestDTO.setOwnAccountNumber(0); //La cuenta de destino NO le pertenece al mismo cliente
+                                                    }
+                                                    log.info("OwnAccountNumber {}", transactionRequestDTO.getOwnAccountNumber());
+
+                                                    Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
+                                                    return transactionRepository.save(trx)
+                                                            .flatMap(t->{
+                                                                prodclient.setBalance(CalculateBalance(prodclient.getBalance(),
+                                                                        trx.getMont(),
+                                                                        trx.getIdTransactionType(),
+                                                                        trx.getTransactionFee()));
+
+                                                                return productClientRepository.save(prodclient)
+                                                                        .flatMap(x-> {
+                                                                            log.info("Actualizado el balance");
+                                                                            //AQUI AGREGAR LLAMADO AL API DE TRX
+                                                                            return wcActivoTarjetaCreditoService.registerTrxEntradaExterna(transactionConverter.EntityToDTO(trx),
+                                                                                            xy.getId())
+                                                                                    .flatMap(z -> {
+                                                                                        return Mono.just(transactionConverter.EntityToDTO(t));
+                                                                                    })
+                                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Error al registrar la trx en el API PasivoCuentaCorrienteService")));
+                                                                        });
+                                                            });
+                                                })
+                                                .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
+                                    }
                                     default: {
                                         return Mono.error(() -> new FunctionalException("El destinationIdProduct especificado no a sido implementado"));
                                     }
@@ -283,8 +447,5 @@ public class TransactionServiceImpl implements TransactionService{
         BigDecimal bd = new BigDecimal(newBalance).setScale(2, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
-
-
-
 
 }

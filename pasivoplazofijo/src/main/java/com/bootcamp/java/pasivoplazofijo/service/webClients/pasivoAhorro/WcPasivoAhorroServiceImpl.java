@@ -1,9 +1,8 @@
-package com.bootcamp.java.pasivoahorro.service.webClients.pasivoCuentaCorriente;
+package com.bootcamp.java.pasivoplazofijo.service.webClients.pasivoAhorro;
 
-import com.bootcamp.java.pasivoahorro.common.Constantes;
-import com.bootcamp.java.pasivoahorro.dto.ProductClientDTO;
-import com.bootcamp.java.pasivoahorro.dto.TransactionDTO;
-import com.bootcamp.java.pasivoahorro.dto.webClientDTO.ClientResponseDTO;
+import com.bootcamp.java.pasivoplazofijo.common.Constantes;
+import com.bootcamp.java.pasivoplazofijo.dto.ProductClientDTO;
+import com.bootcamp.java.pasivoplazofijo.dto.TransactionDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -12,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -21,24 +19,26 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class WcPasivoCuentaCorrienteServiceImpl implements WcPasivoCuentaCorrienteService {
+public class WcPasivoAhorroServiceImpl implements WcPasivoAhorroService {
 
-    private final WebClient wcPasivoCuentaCorriente = WebClient.builder()
-            .baseUrl(Constantes.WebClientUriMSPasivoCuentaCorriente)
+    private final WebClient wcPasivoAhorro = WebClient.builder()
+            .baseUrl(Constantes.WebClientUriMSPasivoAhorro)
             .defaultCookie("cookieKey", "cookieValue")
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
 
-    private final WebClient wcPasivoCuentaCorrienteTrx = WebClient.builder()
-            .baseUrl(Constantes.WebClientUriMSPasivoCuentaCorrienteTrx)
+    private final WebClient wcPasivoAhorroTrx = WebClient.builder()
+            .baseUrl(Constantes.WebClientUriMSPasivoAhorroTrx)
             .defaultCookie("cookieKey", "cookieValue")
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
+
+
+
 
     @Override
     public Mono<ProductClientDTO> findByAccountNumber(String accountNumber) {
-
-        return wcPasivoCuentaCorriente.get()
+        return wcPasivoAhorro.get()
                 .uri("/{accountNumber}" ,accountNumber)
                 .retrieve()
                 .onStatus(httpStatus -> HttpStatus.NO_CONTENT.equals(httpStatus),
@@ -51,7 +51,7 @@ public class WcPasivoCuentaCorrienteServiceImpl implements WcPasivoCuentaCorrien
     @Override
     public Mono<TransactionDTO> registerTrxEntradaExterna(TransactionDTO transactionDTO,
                                                           String IdProductClient) {
-        return wcPasivoCuentaCorrienteTrx.post()
+        return wcPasivoAhorroTrx.post()
                 .uri("/{IdProductClient}" ,IdProductClient)
                 .body(Mono.just(transactionDTO), TransactionDTO.class)
                 .retrieve()
