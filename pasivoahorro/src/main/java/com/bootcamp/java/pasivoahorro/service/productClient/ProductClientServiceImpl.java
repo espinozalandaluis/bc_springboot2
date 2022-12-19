@@ -14,6 +14,7 @@ import com.bootcamp.java.pasivoahorro.repository.TransactionRepository;
 import com.bootcamp.java.pasivoahorro.service.transaction.TransactionService;
 import com.bootcamp.java.pasivoahorro.service.webClients.Clients.WcClientsService;
 import com.bootcamp.java.pasivoahorro.service.webClients.Products.WcProductsService;
+import com.bootcamp.java.pasivoahorro.service.webClients.activoTarjetaCredito.WcActivoTarjetaCreditoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,9 @@ public class ProductClientServiceImpl implements ProductClientService{
 
     @Autowired
     WcProductsService wcProductsService;
+
+    @Autowired
+    WcActivoTarjetaCreditoService wcActivoTarjetaCreditoService;
 
     @Override
     public Flux<ProductClientDTO> findAll() {
@@ -86,6 +90,12 @@ public class ProductClientServiceImpl implements ProductClientService{
                                     log.info("Resultado de llamar al servicio de Clients: {}",cliente.toString());
                                     if(!cliente.getClientTypeDTO().getIdClientType().equals(Constantes.ClientTypePersonal))
                                         return Mono.error(new FunctionalException("El cliente no es tipo Personal"));
+
+                                    //Validar si tiene tarjeta de credito en caso de ser Personal VIP
+                                    if(cliente.getClientTypeDTO().getIdClientType().equals(Constantes.ClientTypePersonalVIP))
+                                    {
+                                        return Mono.error(new FunctionalException("Falta implementar la validacion por al menos una tarjeta de credito"));
+                                    }
 
                                     return wcProductsService.findById(productClientRequest.getIdProduct())
                                             .flatMap(producto->{

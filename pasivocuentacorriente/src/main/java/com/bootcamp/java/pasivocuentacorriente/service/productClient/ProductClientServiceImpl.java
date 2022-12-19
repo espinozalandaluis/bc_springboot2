@@ -108,6 +108,7 @@ public class ProductClientServiceImpl implements ProductClientService{
                                                                     producto,cliente);
 
                                                             //Cuenta Corriente Empresarial Mype, costo de mantenimiento 0.00
+                                                            //Validar si tiene tarjeta de credito
                                                             if(cliente.getClientTypeDTO().getIdClientType().equals(Constantes.ClientTypeEmpresarialMype))
                                                                 prdCli.setMaintenanceCost(0.00);
 

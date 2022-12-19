@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Constantes {
     public static final Integer ClientTypePersonal = 1;
+    public static final Integer ClientTypePersonalVIP = 3;
     public static final Integer ProductTypePasivo = 1;
     public static final Integer ProductSubTypePasivo = 1;
 
