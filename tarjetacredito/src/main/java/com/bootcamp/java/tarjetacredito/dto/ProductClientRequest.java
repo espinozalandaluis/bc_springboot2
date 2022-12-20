@@ -12,4 +12,5 @@ public class ProductClientRequest {
     //private Double depositAmount;
     private Double creditLimit;
     private String accountNumber ;
+    private String creditNumber ;
 }

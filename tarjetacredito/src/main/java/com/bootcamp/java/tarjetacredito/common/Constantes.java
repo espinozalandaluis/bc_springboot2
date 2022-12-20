@@ -8,12 +8,16 @@ import java.util.Date;
 @Slf4j
 public class Constantes {
     public static final Integer ClientTypePersonal = 1;
+
     public static final Integer ProductTypePasivo = 1;
-
     public static final Integer ProductTypeActivo = 2;
-    public static final Integer ProductSubTypePasivo = 1;
 
+    public static final Integer ProductSubTypePasivo = 1;
     public static final Integer ProductSubTypeActivoCreditoPersonal = 4;
+
+    public static final Integer ProductSubTypeActivoCreditoEmpresarial = 5;
+
+    public static final Integer ProductSubTypeActivoTarjetaCredito = 6;
 
     public static final Integer TransactionTypeDeposito =    1;
 

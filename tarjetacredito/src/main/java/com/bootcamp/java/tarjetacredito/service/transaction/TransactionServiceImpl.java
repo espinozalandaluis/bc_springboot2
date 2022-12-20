@@ -52,6 +52,10 @@ public class TransactionServiceImpl implements TransactionService{
                                     ,transactionRequestDTO.getIdProductClient()).collectList()
                             .flatMap(trxPerMonth -> {
 
+                                if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxTransferenciaEntrada
+                                        || transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxPago)
+                                    return Mono.error(() -> new FunctionalException("Error, tipo de transaccion no admitida"));
+
                                 if(transactionRequestDTO.getMont() <= 0.009)
                                     return Mono.error(() -> new FunctionalException("El monto debe ser mayor a 0.00"));
 
@@ -181,6 +185,42 @@ public class TransactionServiceImpl implements TransactionService{
                                                                                 }
                                                                                 else
                                                                                     return Mono.just(transactionConverter.EntityToDTO(t));
+                                                                            });
+                                                                });
+                                                    })
+                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("La cuenta de destino es existe")));
+                                        }else {
+                                            log.info("Trx Activo Personal Otro");
+                                            return Mono.error(() -> new FunctionalException("IdTransactionType no identificado"));
+                                        }
+                                    }
+                                    case 6: {
+                                        if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxDeposito ||
+                                                transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
+                                                transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo ||
+                                                transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxPago){
+
+                                            if(transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxRetiro ||
+                                                    transactionRequestDTO.getIdTransactionType() == Constantes.TipoTrxConsumo)
+                                                if((prodclient.getCreditLimit() - prodclient.getDebt()) < (transactionRequestDTO.getMont() + transactionRequestDTO.getTransactionFee()))
+                                                    return Mono.error(() -> new FunctionalException("No tiene fondos suficientes para realizar la operacion"));
+
+                                            return productClientRepository.findByAccountNumber(transactionRequestDTO.getDestinationAccountNumber())
+                                                    .flatMap(xy -> {
+                                                        transactionRequestDTO.setOwnAccountNumber(0);
+
+                                                        Transaction trx = transactionConverter.DTOtoEntity(transactionRequestDTO);
+                                                        return transactionRepository.save(trx)
+                                                                .flatMap(t->{
+                                                                    prodclient.setDebt(CalculateDebt(prodclient.getDebt(),
+                                                                            trx.getMont(),
+                                                                            trx.getIdTransactionType(),
+                                                                            trx.getTransactionFee()));
+
+                                                                    return productClientRepository.save(prodclient)
+                                                                            .flatMap(x-> {
+                                                                                log.info("Actualizado el balance");
+                                                                                return Mono.just(transactionConverter.EntityToDTO(t));
                                                                             });
                                                                 });
                                                     })

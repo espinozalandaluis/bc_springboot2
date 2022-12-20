@@ -65,7 +65,7 @@ public class ProductClientConvert {
                 //.credits(productClientDTO.getCredits())
                 .accountNumber(productClientRequest.getAccountNumber())
                 .transactionFee(productResponseDTO.getTransactionFee())
-                //.creditCardNumber(productClient.getCreditCardNumber())
+                .creditCardNumber(productClientRequest.getCreditNumber())
                 .build();
     }
 

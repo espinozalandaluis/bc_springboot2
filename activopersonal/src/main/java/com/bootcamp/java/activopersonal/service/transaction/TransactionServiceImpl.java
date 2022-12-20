@@ -207,7 +207,7 @@ public class TransactionServiceImpl implements TransactionService{
                 .flatMap(trx -> {
                     return productClientRepository.findById(IdProductClient)
                             .flatMap(productClient -> {
-                                productClient.setBalance(CalculateBalance(productClient.getBalance(),
+                                productClient.setDebt(CalculateDebt(productClient.getDebt(),
                                         transactionDTO.getMont(),
                                         Constantes.TipoTrxTransferenciaEntrada,0.0));
 
