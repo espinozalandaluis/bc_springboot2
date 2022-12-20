@@ -93,44 +93,50 @@ public class ProductClientServiceImpl implements ProductClientService{
 
                                                 if(!producto.getProductTypeDTO().getIdProductType().equals(Constantes.ProductTypeActivo))
                                                     return Mono.error(new FunctionalException("El producto no es Tipo Activo"));
-                                                if(!producto.getProductSubTypeDTO().getIdProductSubType().equals(Constantes.ProductSubTypeActivoCreditoPersonal))
-                                                    return Mono.error(new FunctionalException("El producto no es SubTipo Credito Personal"));
+                                                if(!producto.getProductSubTypeDTO().getIdProductSubType().equals(Constantes.ProductSubTypeActivoTarjetaCredito))
+                                                    return Mono.error(new FunctionalException("El producto no es SubTipo Tarjeta Credito"));
 
                                                 return productClientRepository.findByAccountNumber(productClientRequest.getAccountNumber()).flux().collectList()
                                                         .flatMap(y->{
                                                             if(y.stream().count() > 0)
                                                                 return Mono.error(new FunctionalException("Existe un AccountNumber"));
 
-                                                            ProductClient prdCli = productClientConvert.DTOToEntity2(productClientRequest,
-                                                                    producto,cliente);
+                                                            return productClientRepository.findByAccountNumber(productClientRequest.getCreditNumber()).flux().collectList()
+                                                                    .flatMap(z->{
+                                                                        if(z.stream().count() > 0)
+                                                                            return Mono.error(new FunctionalException("Existe un CreditNumber"));
 
-                                                            return productClientRepository.save(prdCli)
-                                                                    .flatMap(productocliente -> {
-                                                                        log.info("Resultado de guardar ProductClient: {}",productocliente.toString());
-                                                                        if(productClientRequest.getCreditLimit() > 0){
-                                                                            //prdCli.setTransactionFee(0.00); //Por primera transaccion no se cobra Comision
-                                                                            Transaction trxEntity = transactionConvert.ProductClientEntityToTransactionEntity(prdCli);
-                                                                            log.info("before save transaction trxEntity: {}",trxEntity.toString());
-                                                                            trxEntity.setTransactionFee(0.0);
-                                                                            return transactionRepository.save(trxEntity)
-                                                                                    .flatMap(trx -> {
+                                                                        ProductClient prdCli = productClientConvert.DTOToEntity2(productClientRequest,
+                                                                                producto,cliente);
 
-                                                                                        log.info("Resultado de guardar Transactions: {}",trx.toString());
+                                                                        return productClientRepository.save(prdCli)
+                                                                                .flatMap(productocliente -> {
+                                                                                    log.info("Resultado de guardar ProductClient: {}",productocliente.toString());
+                                                                                    if(productClientRequest.getCreditLimit() > 0){
+                                                                                        //prdCli.setTransactionFee(0.00); //Por primera transaccion no se cobra Comision
+                                                                                        Transaction trxEntity = transactionConvert.ProductClientEntityToTransactionEntity(prdCli);
+                                                                                        log.info("before save transaction trxEntity: {}",trxEntity.toString());
+                                                                                        trxEntity.setTransactionFee(0.0);
+                                                                                        return transactionRepository.save(trxEntity)
+                                                                                                .flatMap(trx -> {
+
+                                                                                                    log.info("Resultado de guardar Transactions: {}",trx.toString());
+                                                                                                    return Mono.just(ProductClientTransactionDTO.builder()
+                                                                                                            .productClientDTO(productClientConvert.EntityToDTO(productocliente))
+                                                                                                            .transactionDTO(transactionConvert.EntityToDTO(trx))
+                                                                                                            .build());
+                                                                                                })
+                                                                                                .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el Transaction")));
+
+                                                                                    }
+                                                                                    else {
                                                                                         return Mono.just(ProductClientTransactionDTO.builder()
                                                                                                 .productClientDTO(productClientConvert.EntityToDTO(productocliente))
-                                                                                                .transactionDTO(transactionConvert.EntityToDTO(trx))
                                                                                                 .build());
-                                                                                    })
-                                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el Transaction")));
-
-                                                                        }
-                                                                        else {
-                                                                            return Mono.just(ProductClientTransactionDTO.builder()
-                                                                                    .productClientDTO(productClientConvert.EntityToDTO(productocliente))
-                                                                                    .build());
-                                                                        }
-                                                                    })
-                                                                    .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el ProductClient")));
+                                                                                    }
+                                                                                })
+                                                                                .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al guardar el ProductClient")));
+                                                                    });
                                                         });
                                             })
                                             .switchIfEmpty(Mono.error(() -> new FunctionalException("Ocurrio un error al consultar el servicio de producto")));
